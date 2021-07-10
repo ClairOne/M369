@@ -5,12 +5,13 @@
         <M369Logo size="128" />
       </v-card>
       <v-card>
-        <v-card-title class="headline justify-center">
-          Welcome to M369!
-        </v-card-title>
+        <v-card-title class="headline justify-center"
+          >Fix This Next</v-card-title
+        >
         <v-card-text class="text-center">
-          <p>Defining, Growing, and Scaling just got easier.</p>
+          <p>Identify the core challenge of your business and fix it.</p>
         </v-card-text>
+        <v-card-actions> </v-card-actions>
       </v-card>
     </v-col>
   </v-row>

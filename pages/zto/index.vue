@@ -5,12 +5,11 @@
         <M369Logo size="128" />
       </v-card>
       <v-card>
-        <v-card-title class="headline justify-center">
-          Welcome to M369!
-        </v-card-title>
+        <v-card-title class="headline justify-center">Zero To One</v-card-title>
         <v-card-text class="text-center">
-          <p>Defining, Growing, and Scaling just got easier.</p>
+          <p>Design your business to succeed and get your first client.</p>
         </v-card-text>
+        <v-card-actions> </v-card-actions>
       </v-card>
     </v-col>
   </v-row>

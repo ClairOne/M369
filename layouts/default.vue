@@ -65,8 +65,18 @@ export default {
         },
         {
           icon: 'mdi-car-turbocharger',
-          title: 'BAG',
-          to: '/inspire',
+          title: 'Accountability',
+          to: '/bag',
+        },
+        {
+          icon: 'mdi-wrench',
+          title: 'FTN',
+          to: '/ftn',
+        },
+        {
+          icon: 'mdi-point-of-sale',
+          title: 'Zero To One',
+          to: '/zto',
         },
       ],
       miniVariant: false,

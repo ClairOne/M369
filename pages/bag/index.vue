@@ -5,12 +5,16 @@
         <M369Logo size="128" />
       </v-card>
       <v-card>
-        <v-card-title class="headline justify-center">
-          Welcome to M369!
-        </v-card-title>
+        <v-card-title class="headline justify-center"
+          >Business Accountability Groups</v-card-title
+        >
         <v-card-text class="text-center">
-          <p>Defining, Growing, and Scaling just got easier.</p>
+          <p>
+            Make progress, stay motivated, while helping others at the same
+            time!
+          </p>
         </v-card-text>
+        <v-card-actions> </v-card-actions>
       </v-card>
     </v-col>
   </v-row>
