@@ -40,12 +40,39 @@ export default {
         // https://go.nuxtjs.dev/vuetify
         '@nuxtjs/vuetify',
     ],
-
+    router: {
+        middleware: ['auth']
+    },
     // Modules: https://go.nuxtjs.dev/config-modules
     modules: [
         // https://go.nuxtjs.dev/pwa
         '@nuxtjs/pwa',
+        '@nuxtjs/firebase'
     ],
+    firebase: {
+        config: {
+            development: {
+                apiKey: "AIzaSyDMjrb-l-Iv0Y-ARWDOyxzxrNFJMPXQgj8",
+                authDomain: "m369-76d85.firebaseapp.com",
+                projectId: "m369-76d85",
+                storageBucket: "m369-76d85.appspot.com",
+                messagingSenderId: "12311357646",
+                appId: "1:12311357646:web:6c8122047972dab984c89f",
+                measurementId: "G-CYM7C5PPFD"
+            }
+        },
+        services: {
+            auth: {
+                persistence: 'local', // default
+                initialize: {
+                    onAuthStateChangedAction: 'onAuthStateChangedAction',
+                    subscribeManually: false
+                },
+                ssr: false,
+            },
+            firestore: true,
+        }
+    },
 
     // PWA module configuration: https://go.nuxtjs.dev/pwa
     pwa: {

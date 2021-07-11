@@ -1,10 +1,12 @@
 <template>
   <v-app>
     <v-navigation-drawer
+      v-if="CurrentUser"
       v-model="drawer"
       :mini-variant="miniVariant"
       :clipped="clipped"
       fixed
+      bottom
       app
     >
       <v-list>
@@ -32,11 +34,15 @@
       </v-list>
     </v-navigation-drawer>
     <v-app-bar :clipped-left="clipped" fixed app>
-      <v-btn icon @click.stop="miniVariant = !miniVariant">
-        <M369Logo size="56" />
-      </v-btn>
+      <v-app-bar-nav-icon
+        v-if="CurrentUser"
+        @click.stop="drawer = !drawer"
+      ></v-app-bar-nav-icon>
+      <M369Logo size="56" />
+      <v-spacer />
       <v-toolbar-title v-text="title" />
       <v-spacer />
+      <USERMENU></USERMENU>
     </v-app-bar>
     <v-main>
       <v-container>
@@ -51,7 +57,13 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+// import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
+import USERMENU from '../components/menus/index.vue'
 export default {
+  components: {
+    USERMENU,
+  },
   data() {
     return {
       clipped: true,
@@ -82,6 +94,9 @@ export default {
       miniVariant: false,
       title: 'M369',
     }
+  },
+  computed: {
+    ...mapGetters(['CurrentUser', 'CurrentUserProfile']),
   },
 }
 </script>

@@ -20,13 +20,26 @@ const actions = {
         }
     },
 }
-const mutations = {}
+const mutations = {
+    /* ROOT */
+    SET_CurrentUser(state, user) {
+        state.CurrentUser = user
+    },
+}
 const state = () => ({
     /* ROOT */
     CurrentUser: null,
     userProfile: null,
 })
-const getters = {}
+const getters = {
+    /* ROOT */
+    CurrentUser(state) {
+        return state.CurrentUser
+    },
+    CurrentUserProfile(state) {
+        return state.userProfile
+    },
+}
 
 export default {
     state,
