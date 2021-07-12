@@ -57,8 +57,8 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-// import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
+import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
+
 import USERMENU from '../components/menus/index.vue'
 export default {
   components: {
@@ -96,7 +96,9 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['CurrentUser', 'CurrentUserProfile']),
+    ...mapState({
+      CurrentUser: (state) => state.user.CurrentUser,
+    }),
   },
 }
 </script>

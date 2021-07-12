@@ -1,5 +1,4 @@
 const actions = {
-    /* ROOT */
     async onAuthStateChangedAction(state, { authUser, claims }) {
         if (!authUser) {
             // remove state
@@ -21,24 +20,16 @@ const actions = {
     },
 }
 const mutations = {
-    /* ROOT */
     SET_CurrentUser(state, user) {
         state.CurrentUser = user
     },
 }
 const state = () => ({
-    /* ROOT */
     CurrentUser: null,
     userProfile: null,
 })
 const getters = {
-    /* ROOT */
-    CurrentUser(state) {
-        return state.CurrentUser
-    },
-    CurrentUserProfile(state) {
-        return state.userProfile
-    },
+    // we don't use getters at this time. Just read the state directly
 }
 
 export default {
