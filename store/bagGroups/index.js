@@ -20,6 +20,9 @@ const actions = {
                         commit('BAG_GROUPS_REMOVE', group)
                         commit('BAG_GROUPS_ADD', group)
                         break;
+                    case 'removed':
+                        commit('BAG_GROUPS_REMOVE', group)
+                        break;
                     default:
                         // code block
                         console.log('<!-- unknown change type: (' + change.type + ') for: ' + group.id)
@@ -27,6 +30,31 @@ const actions = {
                 }
             })
         })
+    },
+    async bagGroupsAdd({ commit }, { NewGroup }) {
+        console.log('<!-- bagGroupsAdd')
+        // @TODO: do some validation here so we are not relying on the forms alone
+        if (!NewGroup) {
+            console.log('If you do not pass a NewGroup, we can not Add it!')
+            return
+        }
+        const newBGroup = {
+            Title: NewGroup.Title,
+            Description: NewGroup.Description,
+            Icon: NewGroup.Icon,
+            Facilitators: NewGroup.Facilitators,
+            Members: NewGroup.Members,
+            Owner: NewGroup.Owner,
+        }
+        this.$fire.firestore.collection('bagGroups').add(newBGroup)
+            .then((docRef) => {
+                console.log('<!-- Document written with ID: ', docRef.id);
+                NewGroup.id = docRef.id
+            })
+            .catch((error) => {
+                console.error('<!-- Error adding document: ', error);
+                return
+            });
     },
 }
 const mutations = {
@@ -44,9 +72,7 @@ const mutations = {
     }
 }
 const getters = {
-    bagGroups(state) {
-        return state.bagGroups.Groups
-    }
+    // we do not use getters at this time. read the state directly
 }
 const state = {
     Groups: [],

@@ -3,9 +3,7 @@
     <v-toolbar color="#602034" rounded class="mb-2 white--text">
       <v-toolbar-title>{{ GroupCount }} BAG Groups</v-toolbar-title>
       <v-spacer></v-spacer>
-      <!--
-          <NEWGROUP btnColor="white" btnTextColor="#01937c" btnSize="24" />
--->
+      <NEWGROUP btnColor="white" btnTextColor="#01937c" btnSize="24" />
     </v-toolbar>
     <v-container fluid>
       <v-simple-table>
@@ -46,11 +44,11 @@
 </template>
 <script>
 import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
-//import NEWGROUP from '../../components/bag/group/newGroup.vue'
+import NEWGROUP from '../../components/bag/group/newGroup.vue'
 
 export default {
   components: {
-    //    NEWGROUP,
+    NEWGROUP,
   },
   transition: 'fade',
   data() {
