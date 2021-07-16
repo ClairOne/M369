@@ -7,12 +7,12 @@
   >
     <template v-slot:activator="{ on, attrs }">
       <v-avatar :color="btnColor" :size="btnSize" v-bind="attrs" v-on="on">
-        <span><v-icon :color="btnTextColor">mdi-plus</v-icon></span>
+        <span><v-icon :color="btnTextColor">mdi-lead-pencil</v-icon></span>
       </v-avatar>
     </template>
     <v-card>
       <v-toolbar color="#602034" rounded class="mb-2 white--text">
-        <v-toolbar-title>New Accountability Group</v-toolbar-title>
+        <v-toolbar-title>Edit Group {{ Title }}</v-toolbar-title>
       </v-toolbar>
       <v-card-text>
         <v-form v-model="valid">
@@ -30,13 +30,6 @@
                     required
                     outlined
                   ></v-text-field>
-                  <v-text-field
-                    v-model="CurrentUser.email"
-                    label="Owner"
-                    hint="You can not change this."
-                    outlined
-                    disabled
-                  ></v-text-field>
                 </v-col>
 
                 <v-col cols="12" md="6">
@@ -52,6 +45,7 @@
                 </v-col>
               </v-row>
             </v-card-text>
+
             <v-card-actions>
               <v-spacer />
               <v-btn :disabled="!valid" color="primary" @click="save()">
@@ -71,51 +65,52 @@
 import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
 
 export default {
-  data: () => ({
-    dialog: false,
-    valid: false,
-    Title: '',
-    Description: '',
-    Icon: 'mdi-account-group-outline',
-    rulesTitle: [
-      (v) => !!v || 'Title is required',
-      (v) => v.length <= 50 || 'Max 50 characters.',
-    ],
-    rulesDescription: [(v) => v.length <= 200 || 'Max 200 characters.'],
-  }),
-  props: ['btnColor', 'btnTextColor', 'btnSize'],
-  computed: {
-    ...mapState({
-      CurrentUser: (state) => state.user.CurrentUser,
-    }),
+  data() {
+    return {
+      dialog: false,
+      valid: false,
+      Title: '',
+      Description: '',
+      Icon: 'mdi-account-group-outline',
+      rulesTitle: [
+        (v) => !!v || 'Title is required',
+        (v) => v.length <= 50 || 'Max 50 characters.',
+      ],
+      rulesDescription: [(v) => v.length <= 200 || 'Max 200 characters.'],
+    }
   },
+  props: ['group', 'btnColor', 'btnTextColor', 'btnSize'],
+  computed: {},
   methods: {
     async save() {
-      let NewGroup = {
+      // validate everything
+      if (!this.valid) {
+        alert('Invalid group info.')
+        return false
+      }
+      // update the record via vuex
+      let Group = {
         Title: this.Title,
         Description: this.Description,
-        Icon: this.Icon,
-        Owner: '/users/' + this.CurrentUser.uid,
-        Facilitators: [],
-        Members: [],
       }
-      let Owner = this.CurrentUser
-      this.$store.dispatch('bagGroups/bagGroupsAdd', { NewGroup })
+      let GroupID = this.group.id
+
+      console.log('<!-- Group(98):')
+      console.log(GroupID)
+      console.log(Group)
+
+      this.$store.dispatch('bagGroups/bagGroupsUpdate', { GroupID, Group })
       this.dialog = false
-      this.valid = false
-      this.Title = ''
-      this.Description = ''
     },
     cancel() {
       this.dialog = false
-      this.valid = false
-      this.Title = ''
-      this.Description = ''
+      return
     },
-    reset() {
-      this.Title = ''
-      this.Description = ''
-    },
+  },
+  created: function () {
+    // assign it here so it's disconected from the store (prevents weird issues)
+    this.Title = this.group.Title
+    this.Description = this.group.Description
   },
 }
 </script>

@@ -67,7 +67,7 @@ export default {
   methods: {
     viewGroup: function (groupID) {
       // redirect the UI to the group
-      //this.$router.push('/bag/group/' + groupID)
+      this.$router.push('/bag/group/' + groupID)
     },
   },
   mounted() {

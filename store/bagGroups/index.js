@@ -31,30 +31,86 @@ const actions = {
             })
         })
     },
-    async bagGroupsAdd({ commit }, { NewGroup }) {
-        console.log('<!-- bagGroupsAdd')
+    async bagGroupsAdd({ commit }, { Group }) {
         // @TODO: do some validation here so we are not relying on the forms alone
-        if (!NewGroup) {
-            console.log('If you do not pass a NewGroup, we can not Add it!')
+        if (!Group) {
+            console.log('If you do not pass a Group, we can not Add it!')
             return
         }
-        const newBGroup = {
-            Title: NewGroup.Title,
-            Description: NewGroup.Description,
-            Icon: NewGroup.Icon,
-            Facilitators: NewGroup.Facilitators,
-            Members: NewGroup.Members,
-            Owner: NewGroup.Owner,
+        const NewGroup = {
+            Title: Group.Title,
+            Description: Group.Description,
+            Icon: Group.Icon,
+            Facilitators: Group.Facilitators,
+            Members: Group.Members,
+            Owner: Group.Owner,
         }
-        this.$fire.firestore.collection('bagGroups').add(newBGroup)
+        this.$fire.firestore.collection('bagGroups').add(NewGroup)
             .then((docRef) => {
-                console.log('<!-- Document written with ID: ', docRef.id);
-                NewGroup.id = docRef.id
+                Group.id = docRef.id
             })
             .catch((error) => {
-                console.error('<!-- Error adding document: ', error);
                 return
             });
+    },
+
+    async bagGroupsUpdate({ state }, { GroupID, Group }) {
+        // @TODO: do some validation here so we are not relying on the forms alone
+        if (!Group) {
+            console.log('If you do not pass a Group, we can not Update it!')
+            return
+        }
+        // update the document
+        // no mutations since the active listeners will pass on the update info
+        this.$fire.firestore.collection('bagGroups')
+            .doc(GroupID)
+            .update(Group)
+            .then(() => {
+                console.log('<!-- Document updated with ID: ', GroupID);
+            })
+            .catch((error) => {
+                console.error('<!-- Error updating document: ', error);
+                return
+            });
+    },
+    /*
+        All this does is add an item to the Group.Members or Group.Facilitators array
+        at this time. We'll need to link this to UserProfiles
+    */
+    async bagGroupMemberAdd({ state }, { GroupID, Member, isFacilitator }) {
+        // @TODO: do some validation here
+        if (!GroupID) {
+            console.log('Invalid GroupID')
+            return
+        }
+        if (!Member) {
+            console.log('If you do not pass a Member, we can not add them!')
+            return
+        }
+        // fetch the document
+        const bagGroupsRef = this.$fire.firestore.collection("bagGroups")
+        const groupRef = bagGroupsRef.doc(GroupID);
+        groupRef.get().then((doc) => {
+            if (doc.exists) {
+                const Group = doc.data()
+                if (isFacilitator) {
+                    Group.Facilitators.push(Member)
+                    groupRef.update({
+                        Facilitators: Group.Facilitators
+                    })
+                } else {
+                    Group.Members.push(Member)
+                    groupRef.update({
+                        Members: Group.Members
+                    })
+                }
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("Invalid Group!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
     },
 }
 const mutations = {
@@ -69,10 +125,14 @@ const mutations = {
         let NewGroups = this.state.bagGroups.Groups.filter(element => element.id != group.id)
         // set the state to this new array
         this.state.bagGroups.Groups = NewGroups
-    }
+    },
 }
 const getters = {
-    // we do not use getters at this time. read the state directly
+    getGroupByID: (state) => (groupID) => {
+        let tmpGroup = state.Groups.find(element => element.id === groupID)
+        if (!tmpGroup) { return {} }
+        return tmpGroup
+    },
 }
 const state = {
     Groups: [],
