@@ -206,16 +206,17 @@ export default {
         alert('All the info is required.')
         return false
       }
-      // create the record
+      // create the Objects
       let GroupID = this.group.id
       let Meeting = this.Meeting
 
-      console.log(Meeting)
+      // dispatch to save the record to FS
       this.$store.dispatch('bagGroups/bagGroupMeetingAdd', {
         GroupID,
         Meeting,
       })
 
+      // shut down the form
       this.reset()
       this.dialog = false
     },
