@@ -15,7 +15,7 @@
         <v-toolbar-title>New Accountability Group</v-toolbar-title>
       </v-toolbar>
       <v-card-text>
-        <v-form v-model="valid">
+        <v-form ref="newGroupForm" v-model="valid">
           <v-card>
             <v-card-title>Group Info ({{ valid }})</v-card-title>
             <v-card-text>
@@ -29,13 +29,6 @@
                     hint="Give your group a unique name."
                     required
                     outlined
-                  ></v-text-field>
-                  <v-text-field
-                    v-model="CurrentUser.email"
-                    label="Owner"
-                    hint="You can not change this."
-                    outlined
-                    disabled
                   ></v-text-field>
                 </v-col>
 
@@ -57,7 +50,7 @@
               <v-btn :disabled="!valid" color="primary" @click="save()">
                 Save
               </v-btn>
-              <v-btn text @click="dialog = false"> Cancel </v-btn>
+              <v-btn text @click="cancel()"> Cancel </v-btn>
               <v-spacer />
             </v-card-actions>
           </v-card>
@@ -74,45 +67,63 @@ export default {
   data: () => ({
     dialog: false,
     valid: false,
-    Group: {
-      Title: '',
-      Description: '',
-      Icon: 'mdi-account-group-outline',
-      Facilitators: [],
-      Members: [],
-      Owner: '',
-    },
+    Title: '',
+    Description: '',
+    Icon: 'mdi-account-group-outline',
+    Facilitators: [],
+    Members: [],
     rulesTitle: [
       (v) => !!v || 'Title is required',
-      (v) => v.length <= 50 || 'Max 50 characters.',
+      (v) => (v && v.length <= 50) || 'Max 50 characters.',
     ],
-    rulesDescription: [(v) => v.length <= 200 || 'Max 200 characters.'],
+    rulesDescription: [(v) => (v && v.length <= 200) || 'Max 200 characters.'],
   }),
   props: ['btnColor', 'btnTextColor', 'btnSize'],
   computed: {
     ...mapState({
       CurrentUser: (state) => state.user.CurrentUser,
     }),
+    Group() {
+      let tmpG = {}
+      tmpG.Title = this.Title
+      tmpG.Description = this.Description
+      tmpG.Icon = this.Icon
+      tmpG.Facilitators = this.Facilitators
+      tmpG.Members = this.Members
+      tmpG.Owner = this.Owner
+      return tmpG
+    },
+    Owner() {
+      const tmpV = '/users/' + this.CurrentUser.uid
+      return tmpV
+    },
   },
   methods: {
     async save() {
-      this.Group.Owner = '/users/' + this.CurrentUser.uid
+      // validate everything
+      if (!this.valid) {
+        alert('All the info is required.')
+        return false
+      }
+      // create the objects
       let Group = this.Group
-      console.log('<!-- attempting to add new group')
-      console.log(Group)
+
+      // dispatch to save the record to FS
       this.$store.dispatch('bagGroups/bagGroupsAdd', { Group })
-      this.dialog = false
+
+      // shot down the form
       this.reset()
-      this.valid = false
+      this.dialog = false
     },
     cancel() {
-      this.dialog = false
+      console.log('<!-- RESET newGroupForm')
       this.reset()
-      this.valid = false
+      //this.dialog = false
+      //this.valid = false
     },
     reset() {
-      this.Group.Title = ''
-      this.Group.Description = ''
+      // reset the form
+      this.$refs.newGroupForm.reset()
     },
   },
 }
