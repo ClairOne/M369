@@ -22,7 +22,7 @@
               <v-row>
                 <v-col cols="12" md="6">
                   <v-text-field
-                    v-model="Title"
+                    v-model="Group.Title"
                     :rules="rulesTitle"
                     :counter="50"
                     label="Title"
@@ -41,7 +41,7 @@
 
                 <v-col cols="12" md="6">
                   <v-textarea
-                    v-model="Description"
+                    v-model="Group.Description"
                     :rules="rulesDescription"
                     :counter="100"
                     label="Description"
@@ -74,9 +74,14 @@ export default {
   data: () => ({
     dialog: false,
     valid: false,
-    Title: '',
-    Description: '',
-    Icon: 'mdi-account-group-outline',
+    Group: {
+      Title: '',
+      Description: '',
+      Icon: 'mdi-account-group-outline',
+      Facilitators: [],
+      Members: [],
+      Owner: '',
+    },
     rulesTitle: [
       (v) => !!v || 'Title is required',
       (v) => v.length <= 50 || 'Max 50 characters.',
@@ -91,30 +96,23 @@ export default {
   },
   methods: {
     async save() {
-      let NewGroup = {
-        Title: this.Title,
-        Description: this.Description,
-        Icon: this.Icon,
-        Owner: '/users/' + this.CurrentUser.uid,
-        Facilitators: [],
-        Members: [],
-      }
-      let Owner = this.CurrentUser
-      this.$store.dispatch('bagGroups/bagGroupsAdd', { NewGroup })
+      this.Group.Owner = '/users/' + this.CurrentUser.uid
+      let Group = this.Group
+      console.log('<!-- attempting to add new group')
+      console.log(Group)
+      this.$store.dispatch('bagGroups/bagGroupsAdd', { Group })
       this.dialog = false
+      this.reset()
       this.valid = false
-      this.Title = ''
-      this.Description = ''
     },
     cancel() {
       this.dialog = false
+      this.reset()
       this.valid = false
-      this.Title = ''
-      this.Description = ''
     },
     reset() {
-      this.Title = ''
-      this.Description = ''
+      this.Group.Title = ''
+      this.Group.Description = ''
     },
   },
 }

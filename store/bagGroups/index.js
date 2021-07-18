@@ -5,6 +5,14 @@ const actions = {
         }
         dispatch('bagGroupsListen')
     },
+    async meetingsConnect({ context, dispatch }, GroupID) {
+        if (!GroupID) {
+            console.log('<!-- Invalid GroupID:' + GroupID)
+            return
+        }
+        // this is just to follow the groupsConnect/groupsListen pattern
+        dispatch('bagMeetingsListen', GroupID)
+    },
     async bagGroupsListen({ commit }) {
         commit('BAG_GROUPS_SET', [])
         this.$fire.firestore.collection('bagGroups').onSnapshot((res) => {
@@ -31,10 +39,41 @@ const actions = {
             })
         })
     },
-    async bagGroupsAdd({ commit }, { Group }) {
+    async bagMeetingsListen({ commit }, GroupID) {
+        // check the required input
+        if (!GroupID) {
+            return
+        }
+        commit('BAG_MEETINGS_SET', [])
+        this.$fire.firestore.collection('bagGroups').doc(GroupID).collection('Meetings').onSnapshot((res) => {
+            const changes = res.docChanges()
+            changes.forEach((change) => {
+                let meeting = change.doc.data()
+                meeting.id = change.doc.id
+                switch (change.type) {
+                    case 'added':
+                        commit('BAG_MEETINGS_ADD', meeting)
+                        break;
+                    case 'modified':
+                        commit('BAG_MEETINGS_REMOVE', meeting)
+                        commit('BAG_MEETINGS_ADD', meeting)
+                        break;
+                    case 'removed':
+                        commit('BAG_MEETINGS_REMOVE', meeting)
+                        break;
+                    default:
+                        // code block
+                        console.log('<!-- unknown change type: (' + change.type + ') for: ' + meeting.id)
+                        console.log(meeting)
+                }
+            })
+        })
+    },
+    async bagGroupsAdd({ state }, { Group }) {
         // @TODO: do some validation here so we are not relying on the forms alone
         if (!Group) {
             console.log('If you do not pass a Group, we can not Add it!')
+            console.log(Group)
             return
         }
         const NewGroup = {
@@ -74,6 +113,7 @@ const actions = {
             });
     },
     /*
+        21-07-14:
         All this does is add an item to the Group.Members or Group.Facilitators array
         at this time. We'll need to link this to UserProfiles
     */
@@ -112,6 +152,27 @@ const actions = {
             console.log("Error getting document:", error);
         });
     },
+    /*
+        Let's create a new Meeting doc(sub collection) in the bagGroups collection
+    */
+    async bagGroupMeetingAdd({ state }, { GroupID, Meeting }) {
+        // @TODO: do some validation here
+        if (!GroupID) {
+            console.log('Invalid GroupID')
+            return
+        }
+        if (!Meeting) {
+            console.log('If you do not pass a Meeting, we can not create it!')
+            return
+        }
+        // insert a new meeting into the bagGroup subcollection
+        this.$fire.firestore.collection('bagGroups').doc(GroupID)
+            .collection('Meetings').add(Meeting).then((doc) => {
+                Meeting.id = docRef.id
+            }).catch((error) => {
+                console.log("Error creating the meeting:", error);
+            });
+    },
 }
 const mutations = {
     BAG_GROUPS_SET(state, groups) {
@@ -126,6 +187,19 @@ const mutations = {
         // set the state to this new array
         this.state.bagGroups.Groups = NewGroups
     },
+    BAG_MEETINGS_SET(state, meetings) {
+        state.Meetings = meetings
+    },
+    BAG_MEETINGS_ADD(state, meeting) {
+        state.Meetings.push(meeting)
+    },
+    BAG_MEETINGS_REMOVE(state, meeting) {
+        // filter the existing bagGroups.Meetings to exclude the one to be removed
+        let NewMeetings = this.state.bagGroups.Meetings.filter(element => element.id != meeting.id)
+        // set the state to this new array
+        this.state.bagGroups.Meetings = NewMeetings
+    },
+
 }
 const getters = {
     getGroupByID: (state) => (groupID) => {
@@ -136,62 +210,11 @@ const getters = {
 }
 const state = {
     Groups: [],
-    xGroups: [
-        {
-            id: 1,
-            Title: 'M3 Elite',
-            Description: 'Our core since Jan 2020',
-            Facilitators: [
-                {
-                    DisplayName: 'Gary C',
-                    Initials: 'GC',
-                    FirstName: 'Gary',
-                    LastName: 'Cartegena',
-                    Email: 'dave+gary@clair.one',
-                    id: 42,
-                },
-                {
-                    DisplayName: 'Dave P',
-                    Initials: 'DP',
-                    FirstName: 'David',
-                    LastName: 'Pomeroy',
-                    Email: 'rwaters44@gmail.com',
-                    id: 8,
-                },
-            ],
-            Members: [
-                { DisplayName: 'Dave P', Initials: 'DP' },
-                { DisplayName: 'Omri B', Initials: 'OB' },
-                { DisplayName: 'Cameron A', Initials: 'CA' },
-            ],
-            Icon: 'mdi-account',
-        },
-        {
-            id: 2,
-            Title: 'Wolf Pack',
-            Description: 'Group Coaching',
-            Facilitators: [
-                {
-                    DisplayName: 'Frankie F',
-                    Initials: 'FF',
-                    FirstName: 'Frankie',
-                    LastName: 'Fihn',
-                    Email: 'dave+frankie@clair.one',
-                    id: 42,
-                },
-            ],
-            Members: [
-                { DisplayName: 'Dave P', Initials: 'DP' },
-                { DisplayName: 'Jeff L', Initials: 'JL' },
-                { DisplayName: 'Jenn B', Initials: 'JB' },
-                { DisplayName: 'Hank F', Initials: 'HF' },
-                { DisplayName: 'Andrea B', Initials: 'AB' },
-                { DisplayName: 'Holy', Initials: 'HD' },
-                { DisplayName: 'Larry D', Initials: 'LD' },
-            ],
-            Icon: 'mdi-account',
-        },
-    ],
+    Meetings: [],
+    Current: {
+        GroupID: '',
+        MeetingID: '',
+    }
 }
 
 export default {

@@ -122,23 +122,43 @@
             <v-card class="mt-6">
               <v-toolbar color="#01937c" class="white--text" dense>
                 <v-icon color="white" class="mr-2">mdi-forum-outline</v-icon>
-                <v-toolbar-title>Meetings</v-toolbar-title>
+                <v-toolbar-title>Open Meetings</v-toolbar-title>
                 <v-spacer />
-                <!--
                 <NEWMEETING
                   :group="Group"
                   btnColor="white"
                   btnTextColor="#01937c"
                   btnSize="24"
                 />
--->
               </v-toolbar>
               <v-card-text>
                 <v-simple-table>
+                  <thead>
+                    <tr>
+                      <th class="text-left">Date/Time</th>
+                      <th class="text-left">Facilitator</th>
+                      <th class="text-center">Attendees</th>
+                      <th class="text-right">Status</th>
+                    </tr>
+                  </thead>
+
                   <tbody>
-                    <tr v-for="meeting in Group.Meetings" :key="meeting.id">
+                    <tr v-for="meeting in Meetings" :key="meeting.id">
                       <td class="text-left">
                         {{ meeting.MeetingDate }}
+                      </td>
+                      <td class="text-left">
+                        {{ meeting.Facilitator.DisplayName }}
+                      </td>
+                      <td class="text-center">
+                        <span
+                          v-if="
+                            meeting.Attendees && meeting.Attendees.length > 0
+                          "
+                        >
+                          {{ meeting.Attendees.length }}
+                        </span>
+                        <span v-else>0</span>
                       </td>
                       <td class="text-right">
                         <v-icon color="info" @click="viewMeeting(meeting.id)"
@@ -158,10 +178,21 @@
 </template>
 
 <script>
+/*
+ @POSTRELEASE: Filter the meetings based on open status with a link to the complete meeting history
+ */
+
+// @LEFTOFF
+/*
+When adding a new meeting we get duplicate key errors.
+
+Resolve the dup key error and move on to the Meeting detail screen.
+*/
+
 // import axios from 'axios'
 import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
 import EDITGROUPINFO from '../../../components/bag/group/editGroupInfo.vue'
-//import NEWMEETING from '../../../components/bag/group/newMeeting.vue'
+import NEWMEETING from '../../../components/bag/group/newMeeting.vue'
 import NEWMEMBER from '../../../components/bag/group/newMember.vue'
 //import EDITMEMBER from '../../../components/bag/group/editMember.vue'
 //import EDITFACILITATOR from '../../../components/bag/group/editFacilitator.vue'
@@ -169,7 +200,7 @@ import NEWMEMBER from '../../../components/bag/group/newMember.vue'
 export default {
   components: {
     EDITGROUPINFO,
-    //    NEWMEETING,
+    NEWMEETING,
     NEWMEMBER,
     //    EDITMEMBER,
     //    EDITFACILITATOR,
@@ -178,74 +209,6 @@ export default {
   data() {
     return {
       error: null,
-      groupX: {
-        id: 1,
-        Owner: {
-          DisplayName: 'Gary C',
-          Initials: 'GC',
-          FirstName: 'Gary',
-          LastName: 'Cartegena',
-          Email: 'dave+gary@clair.one',
-          id: 42,
-        },
-
-        Title: 'M3 Elite',
-        Description: 'Our core since Jan 2020',
-        Facilitators: [
-          {
-            DisplayName: 'Gary C',
-            Initials: 'GC',
-            FirstName: 'Gary',
-            LastName: 'Cartegena',
-            Email: 'dave+gary@clair.one',
-            id: 42,
-          },
-          {
-            DisplayName: 'Dave P',
-            Initials: 'DP',
-            FirstName: 'David',
-            LastName: 'Pomeroy',
-            Email: 'rwaters44@gmail.com',
-            id: 8,
-          },
-        ],
-        Members: [
-          {
-            DisplayName: 'Dave P',
-            Initials: 'DP',
-            FirstName: 'David',
-            LastName: 'Pomeroy',
-            Email: 'rwaters44@gmail.com',
-            id: 8,
-          },
-          {
-            DisplayName: 'Omri B',
-            Initials: 'OB',
-            FirstName: 'Omri',
-            LastName: 'Blit',
-            Email: 'dave+omri@clair.one',
-            id: 2,
-          },
-          {
-            DisplayName: 'Cameron A',
-            Initials: 'CA',
-            FirstName: 'Cameron',
-            LastName: 'Arsenault',
-            Email: 'dave+cam@clair.one',
-            id: 7,
-          },
-          {
-            DisplayName: 'Gary C',
-            Initials: 'GC',
-            FirstName: 'Gary',
-            LastName: 'Cartegena',
-            Email: 'dave+gary@clair.one',
-            id: 42,
-          },
-        ],
-        Icon: 'mdi-account',
-      },
-
       meetings: [
         { MeetingDate: '2021-07-05', id: 156 },
         { MeetingDate: '2021-06-28', id: 221 },
@@ -261,6 +224,9 @@ export default {
         this.$route.params.id
       )
     },
+    ...mapState({
+      Meetings: (state) => state.bagGroups.Meetings,
+    }),
   },
   methods: {
     viewMeeting: function (meetingID) {
@@ -271,6 +237,7 @@ export default {
   mounted() {
     // in case we aren't connected yet
     this.$store.dispatch('bagGroups/groupsConnect', false)
+    this.$store.dispatch('bagGroups/meetingsConnect', this.$route.params.id)
   },
 }
 </script>
