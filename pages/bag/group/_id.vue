@@ -209,13 +209,6 @@ export default {
   data() {
     return {
       error: null,
-      meetings: [
-        { MeetingDate: '2021-07-05', id: 156 },
-        { MeetingDate: '2021-06-28', id: 221 },
-        { MeetingDate: '2021-06-21', id: 15 },
-        { MeetingDate: '2021-06-14', id: 84 },
-        { MeetingDate: '2021-06-07', id: 61 },
-      ],
     }
   },
   computed: {
