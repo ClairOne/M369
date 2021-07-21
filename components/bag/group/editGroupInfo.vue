@@ -88,16 +88,12 @@ export default {
         alert('Invalid group info.')
         return false
       }
-      // update the record via vuex
+      // update the record via store
       let Group = {
         Title: this.Title,
         Description: this.Description,
       }
       let GroupID = this.group.id
-
-      console.log('<!-- Group(98):')
-      console.log(GroupID)
-      console.log(Group)
 
       this.$store.dispatch('bagGroups/bagGroupsUpdate', { GroupID, Group })
       this.dialog = false

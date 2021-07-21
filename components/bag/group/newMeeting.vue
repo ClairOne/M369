@@ -211,7 +211,7 @@ export default {
       let Meeting = this.Meeting
 
       // dispatch to save the record to FS
-      this.$store.dispatch('bagGroups/bagGroupMeetingAdd', {
+      this.$store.dispatch('bagMeetings/Add', {
         GroupID,
         Meeting,
       })

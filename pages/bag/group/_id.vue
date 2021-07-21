@@ -9,7 +9,7 @@
     <v-sheet class="mx-auto pa-2" rounded elevation="3">
       <v-card-text>
         <v-row>
-          <v-col>
+          <v-col cols="12" md="4">
             <v-card class="mt-6">
               <v-toolbar color="#01937c" class="white--text" dense>
                 <v-icon color="white" class="mr-2"
@@ -74,7 +74,7 @@
               </v-card-text>
             </v-card>
           </v-col>
-          <v-col>
+          <v-col cols="12" md="8">
             <v-card class="mt-6">
               <v-toolbar color="#01937c" class="white--text" dense>
                 <v-icon color="white" class="mr-2"
@@ -117,8 +117,6 @@
                 </v-simple-table>
               </v-card-text>
             </v-card>
-          </v-col>
-          <v-col>
             <v-card class="mt-6">
               <v-toolbar color="#01937c" class="white--text" dense>
                 <v-icon color="white" class="mr-2">mdi-forum-outline</v-icon>
@@ -181,15 +179,6 @@
 /*
  @POSTRELEASE: Filter the meetings based on open status with a link to the complete meeting history
  */
-
-// @LEFTOFF
-/*
-When adding a new meeting we get duplicate key errors.
-
-Resolve the dup key error and move on to the Meeting detail screen.
-*/
-
-// import axios from 'axios'
 import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
 import EDITGROUPINFO from '../../../components/bag/group/editGroupInfo.vue'
 import NEWMEETING from '../../../components/bag/group/newMeeting.vue'
@@ -212,25 +201,23 @@ export default {
     }
   },
   computed: {
-    Group() {
-      return this.$store.getters['bagGroups/getGroupByID'](
-        this.$route.params.id
-      )
-    },
     ...mapState({
-      Meetings: (state) => state.bagGroups.Meetings,
+      Group: (state) => state.bagGroups.Group,
+      Meetings: (state) => state.bagMeetings.Meetings,
     }),
   },
   methods: {
     viewMeeting: function (meetingID) {
       // redirect the UI to the meeting
-      this.$router.push('/bag/meet/' + meetingID)
+      this.$router.push('/bag/meet/' + this.$route.params.id + '/' + meetingID)
     },
   },
   mounted() {
     // in case we aren't connected yet
-    this.$store.dispatch('bagGroups/groupsConnect', false)
-    this.$store.dispatch('bagGroups/meetingsConnect', this.$route.params.id)
+    //this.$store.dispatch('bagGroups/connect', false)
+    let GroupID = this.$route.params.id
+    this.$store.dispatch('bagGroups/loadGroupListener', GroupID)
+    this.$store.dispatch('bagMeetings/connect', GroupID)
   },
 }
 </script>
