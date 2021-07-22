@@ -102,7 +102,7 @@
                 <v-container>
                   <v-row class="pl-5 pr-5">
                     <v-text-field
-                      v-model="currentHigh"
+                      v-model="HighTitle"
                       label="High"
                       required
                     ></v-text-field>
@@ -111,6 +111,7 @@
                       color="success"
                       class="ma-2 white--text"
                       @click="addHigh(true)"
+                      :disabled="!validNewHigh"
                     >
                       <v-icon> mdi-arrow-up-box </v-icon>
                     </v-btn>
@@ -118,6 +119,7 @@
                       color="error"
                       class="ma-2 white--text"
                       @click="addHigh(false)"
+                      :disabled="!validNewHigh"
                     >
                       <v-icon> mdi-arrow-down-box </v-icon>
                     </v-btn>
@@ -238,12 +240,16 @@ export default {
       selectedTab: [],
       selectedAttendeeIndex: {},
 
-      currentHigh: [],
+      HighTitle: [],
       currentGoal: [],
       currentSidebar: [],
     }
   },
   computed: {
+    ...mapState({
+      Group: (state) => state.bagGroups.Group,
+      Meeting: (state) => state.bagMeetings.Meeting,
+    }),
     selectedAttendee: function () {
       // changes the currentMember based on which item in the list is selected.
       if (this.selectedAttendeeIndex == null) {
@@ -257,10 +263,6 @@ export default {
       }
       return this.Meeting.Attendees[this.selectedAttendeeIndex]
     },
-    ...mapState({
-      Group: (state) => state.bagGroups.Group,
-      Meeting: (state) => state.bagMeetings.Meeting,
-    }),
 
     /*
     Return a list of highs filtered based on the selected member
@@ -282,7 +284,7 @@ export default {
       return tmpHighs
     },
 
-    filteredGoals() {
+    attendeeGoals() {
       return []
       // should we filter or return them all?
       if (!this.currentMember || !this.currentMember.id) {
@@ -297,7 +299,7 @@ export default {
       })
       return tmpGoals
     },
-    filteredSidebars() {
+    attendeeSidebars() {
       return []
       // should we filter or return them all?
       if (!this.currentMember || !this.currentMember.id) {
@@ -315,10 +317,32 @@ export default {
       })
       return tmpSidebars
     },
+    validNewHigh() {
+      if (!this.selectedAttendee || !this.selectedAttendee.Email) {
+        return false
+      }
+      if (!this.HighTitle.length > 0) {
+        return false
+      }
+      return true
+    },
   },
   methods: {
     addHigh: function (IsHigh) {
-      //console.log('<!-- method:addHigh:' + IsHigh)
+      if (!this.validNewHigh) {
+        return
+      }
+      const highMember = this.selectedAttendee
+      // build the high
+      const newHigh = {
+        IsHigh: IsHigh,
+        MemberEmail: highMember.Email,
+        MemberInitials: highMember.Initials,
+        Title: this.HighTitle,
+      }
+      const GroupID = this.$route.params.groupid
+      const MeetingID = this.$route.params.id
+      this.$store.dispatch('bagMeetings/AddHigh', {GroupID, MeetingID, newHigh})
     },
     viewGroup: function (groupID) {
       // redirect the UI to the group

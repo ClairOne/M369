@@ -78,9 +78,24 @@ const actions = {
                 console.log("Error creating the meeting:", error);
             });
     },
-    /* @LEFTOFF:
-    Moving meeting stuff to it's own store index file. The bagGroups one is getting big.
-    */
+    async AddHigh({ commit }, { GroupID, MeetingID, newHigh }) {
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((doc) => {
+            if (doc.exists) {
+                const Meeting = doc.data()
+                Meeting.Highs.push(newHigh)
+                meetingRef.update({
+                    Highs: Meeting.Highs
+                })
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
 }
 const mutations = {
     BAG_MEETINGS_SET(state, meetings) {
@@ -91,14 +106,13 @@ const mutations = {
     },
     BAG_MEETINGS_REMOVE(state, meeting) {
         // filter the existing bagGroups.Meetings to exclude the one to be removed
-        let NewMeetings = this.state.bagMeetings.Meetings.filter(element => element.id != meeting.id)
+        let NewMeetings = this.state.Meetings.filter(element => element.id != meeting.id)
         // set the state to this new array
-        this.state.bagMeetings.Meetings = NewMeetings
+        state.Meetings = NewMeetings
     },
     BAG_MEETING_SET(state, meeting) {
         state.Meeting = meeting
-    }
-
+    },
 }
 const getters = {
     getByID: (state) => (meetingID) => {
@@ -109,7 +123,7 @@ const getters = {
 }
 const state = {
     Meetings: [],
-    Meeting: { Facilitator: {}, Attendees: [] },
+    Meeting: { Facilitator: {}, Attendees: [], Highs: [] },
 }
 
 export default {
