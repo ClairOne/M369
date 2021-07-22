@@ -154,7 +154,6 @@ export default {
   },
   methods: {
     attendeeHighs(AttendeeEmail) {
-      console.log('<!-- report.attendeeHighs(AttendeeEmail):' + AttendeeEmail)
       // should we filter or return them all?
       if (!AttendeeEmail) {
         // no Email, return them all
