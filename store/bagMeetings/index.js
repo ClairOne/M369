@@ -131,7 +131,7 @@ const mutations = {
     },
     BAG_MEETINGS_REMOVE(state, meeting) {
         // filter the existing bagGroups.Meetings to exclude the one to be removed
-        let NewMeetings = this.state.Meetings.filter(element => element.id != meeting.id)
+        let NewMeetings = state.Meetings.filter(element => element.id != meeting.id)
         // set the state to this new array
         state.Meetings = NewMeetings
     },
