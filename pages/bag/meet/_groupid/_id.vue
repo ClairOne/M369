@@ -342,7 +342,23 @@ export default {
       }
       const GroupID = this.$route.params.groupid
       const MeetingID = this.$route.params.id
-      this.$store.dispatch('bagMeetings/AddHigh', {GroupID, MeetingID, newHigh})
+      this.$store.dispatch('bagMeetings/AddHigh', {
+        GroupID,
+        MeetingID,
+        newHigh,
+      })
+      this.HighTitle = ''
+    },
+    removeHigh: function (high) {
+      const GroupID = this.$route.params.groupid
+      const MeetingID = this.$route.params.id
+      const High = high
+
+      this.$store.dispatch('bagMeetings/RemoveHigh', {
+        GroupID,
+        MeetingID,
+        High,
+      })
     },
     viewGroup: function (groupID) {
       // redirect the UI to the group

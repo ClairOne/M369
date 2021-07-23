@@ -116,10 +116,7 @@ export default {
       this.dialog = false
     },
     cancel() {
-      console.log('<!-- RESET newGroupForm')
       this.reset()
-      //this.dialog = false
-      //this.valid = false
     },
     reset() {
       // reset the form

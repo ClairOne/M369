@@ -168,7 +168,7 @@ export default {
         })
       }
       if (this.Membership === 'Facilitator' || this.Membership === 'Both') {
-        console.log('Add to Group.Facilitators')
+        // add member to Group.Facilitators
         this.$store.dispatch('bagGroups/bagGroupMemberAdd', {
           GroupID,
           Member,

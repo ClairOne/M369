@@ -50,7 +50,6 @@ const actions = {
     */
     async loadMeetingListener({ commit }, { GroupID, MeetingID }) {
         commit('BAG_MEETING_SET', {})
-        console.log('<!-- attempting to listen to bagGroups/' + GroupID + '/Meetings/' + MeetingID)
         this.$fire.firestore.collection('bagGroups').doc(GroupID)
             .collection('Meetings').doc(MeetingID).onSnapshot((doc) => {
                 var Meeting = doc.data()
@@ -84,7 +83,9 @@ const actions = {
         meetingRef.get().then((doc) => {
             if (doc.exists) {
                 const Meeting = doc.data()
+                // here's where we insert the newHigh
                 Meeting.Highs.push(newHigh)
+                // update FS document (Firestore & Vuex handles the rest with the listeners)
                 meetingRef.update({
                     Highs: Meeting.Highs
                 })
@@ -96,6 +97,30 @@ const actions = {
             console.log("Error getting document:", error);
         });
     },
+    async RemoveHigh({ context }, { GroupID, MeetingID, High }) {
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((doc) => {
+            if (doc.exists) {
+                const Meeting = doc.data()
+                // let's build a new list of highs without the one to be removed
+                let tmpHighs = Meeting.Highs
+                tmpHighs = tmpHighs.filter((item) => {
+                    return (item.MemberEmail != High.MemberEmail || item.Title != High.Title)
+                })
+                // here's where we actually remove the high
+                meetingRef.update({
+                    Highs: tmpHighs
+                })
+                // Vuex/Firestore takes care of the rest
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    }
 }
 const mutations = {
     BAG_MEETINGS_SET(state, meetings) {

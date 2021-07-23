@@ -24,7 +24,7 @@ const actions = {
                         commit('BAG_GROUPS_REMOVE', group)
                         break;
                     default:
-                        // code block
+                        // @TODO: deal with this a better way.
                         console.log('<!-- unknown change type: (' + change.type + ') for: ' + group.id)
                         console.log(group)
                 }
