@@ -57,12 +57,15 @@
           :key="attendee.Email"
           class="pa-5"
         >
-          <v-toolbar color="secondary" class="white--text">
-            <v-toolbar-title>{{ attendee.DisplayName }}</v-toolbar-title>
-          </v-toolbar>
-
           <v-container>
-            <h4>Highs &amp; Lows</h4>
+            <v-toolbar color="secondary" class="white--text" dense rounded>
+              <v-toolbar-title>{{ attendee.DisplayName }}</v-toolbar-title>
+            </v-toolbar>
+          </v-container>
+          <v-container>
+            <v-toolbar color="accent" class="white--text" dense rounded>
+              <v-toolbar-title>Highs &amp; Lows</v-toolbar-title>
+            </v-toolbar>
             <v-simple-table>
               <thead>
                 <tr>
@@ -87,7 +90,9 @@
           </v-container>
 
           <v-container>
-            <h4>Goals</h4>
+            <v-toolbar color="accent" class="white--text" dense rounded>
+              <v-toolbar-title>Goals</v-toolbar-title>
+            </v-toolbar>
             <v-simple-table>
               <thead>
                 <tr>
@@ -106,7 +111,9 @@
           </v-container>
 
           <v-container>
-            <h4>Sidebars</h4>
+            <v-toolbar color="accent" class="white--text" dense rounded>
+              <v-toolbar-title>Sidebars</v-toolbar-title>
+            </v-toolbar>
             <v-simple-table>
               <thead>
                 <tr>
