@@ -19,7 +19,7 @@
       <v-card-text>
         <v-form ref="newMeeting" v-model="valid">
           <v-card>
-            <v-card-title>New Meeting ({{ valid }})</v-card-title>
+            <v-card-title>New Meeting</v-card-title>
             <v-card-text>
               <v-row>
                 <v-spacer />
@@ -231,6 +231,16 @@ export default {
       this.$refs.newMeeting.reset()
       return
     },
+  },
+  mounted() {
+    const current = new Date()
+    const date = `${current.getFullYear()}-${
+      current.getMonth() + 1
+    }-${current.getDate()}`
+    this.MeetingDate = date
+
+    const time = `${current.getHours()}:${current.getMinutes()}`
+    this.MeetingTime = time
   },
 }
 </script>
