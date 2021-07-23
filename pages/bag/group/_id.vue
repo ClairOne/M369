@@ -18,7 +18,7 @@
                 <v-toolbar-title>About</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <EDITGROUPINFO
-                  v-bind:group="Group"
+                  v-bind:Group="Group"
                   btnColor="white"
                   btnTextColor="#01937c"
                   btnSize="24"
@@ -35,7 +35,8 @@
                 <v-toolbar-title>Facilitators</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <NEWMEMBER
-                  :group="Group"
+                  :Group="Group"
+                  :GroupID="GroupID"
                   btnColor="white"
                   btnTextColor="#01937c"
                   btnSize="24"
@@ -60,8 +61,8 @@
                       <td class="text-right">
                         <!--
                         <EDITFACILITATOR
-                          :group="Group"
-                          :member="facilitator"
+                          :Group="Group"
+                          :Member="facilitator"
                           btnColor="white"
                           btnTextColor="info"
                           btnSize="24"
@@ -83,7 +84,8 @@
                 <v-toolbar-title>Members</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <NEWMEMBER
-                  :group="Group"
+                  :Group="Group"
+                  :GroupID="GroupID"
                   btnColor="white"
                   btnTextColor="#01937c"
                   btnSize="24"
@@ -91,21 +93,32 @@
               </v-toolbar>
               <v-card-text>
                 <v-simple-table>
+                  <thead>
+                    <tr>
+                      <th class="text-center" width="10%">Initials</th>
+                      <th class="text-left" width="30%">Display Name</th>
+                      <th class="text-left" width="40%">Email</th>
+                      <th class="text-right" width="20%"></th>
+                    </tr>
+                  </thead>
                   <tbody>
-                    <tr v-for="member in Group.Members" :key="member.id">
-                      <td class="text-left">
+                    <tr v-for="Member in Members" :key="Member.id">
+                      <td class="text-center">
                         <v-chip small color="success">{{
-                          member.Initials
+                          Member.Initials
                         }}</v-chip>
                       </td>
                       <td class="text-left">
-                        {{ member.DisplayName }}
+                        {{ Member.DisplayName }}
+                      </td>
+                      <td class="text-left">
+                        {{ Member.Email }}
                       </td>
                       <td class="text-right">
                         <!--
                         <EDITMEMBER
-                          :group="Group"
-                          :member="member"
+                          :Group="Group"
+                          :Member="Member"
                           btnColor="white"
                           btnTextColor="info"
                           btnSize="24"
@@ -123,7 +136,7 @@
                 <v-toolbar-title>Open Meetings</v-toolbar-title>
                 <v-spacer />
                 <NEWMEETING
-                  :group="Group"
+                  :Group="Group"
                   btnColor="white"
                   btnTextColor="#01937c"
                   btnSize="24"
@@ -198,12 +211,14 @@ export default {
   data() {
     return {
       error: null,
+      GroupID: null,
     }
   },
   computed: {
     ...mapState({
       Group: (state) => state.bagGroups.Group,
       Meetings: (state) => state.bagMeetings.Meetings,
+      Members: (state) => state.bagMembers.Members,
     }),
   },
   methods: {
@@ -216,8 +231,10 @@ export default {
     // in case we aren't connected yet
     //this.$store.dispatch('bagGroups/connect', false)
     let GroupID = this.$route.params.id
+    this.GroupID = GroupID
     this.$store.dispatch('bagGroups/loadGroupListener', GroupID)
     this.$store.dispatch('bagMeetings/connect', GroupID)
+    this.$store.dispatch('bagMembers/connect', GroupID)
   },
 }
 </script>

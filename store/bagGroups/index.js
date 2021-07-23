@@ -10,29 +10,29 @@ const actions = {
         this.$fire.firestore.collection('bagGroups').onSnapshot((res) => {
             const changes = res.docChanges()
             changes.forEach((change) => {
-                let group = change.doc.data()
-                group.id = change.doc.id
+                let Group = change.doc.data()
+                Group.id = change.doc.id
                 switch (change.type) {
                     case 'added':
-                        commit('BAG_GROUPS_ADD', group)
+                        commit('BAG_GROUPS_ADD', Group)
                         break;
                     case 'modified':
-                        commit('BAG_GROUPS_REMOVE', group)
-                        commit('BAG_GROUPS_ADD', group)
+                        commit('BAG_GROUPS_REMOVE', Group)
+                        commit('BAG_GROUPS_ADD', Group)
                         break;
                     case 'removed':
-                        commit('BAG_GROUPS_REMOVE', group)
+                        commit('BAG_GROUPS_REMOVE', Group)
                         break;
                     default:
                         // @TODO: deal with this a better way.
-                        console.log('<!-- unknown change type: (' + change.type + ') for: ' + group.id)
-                        console.log(group)
+                        console.log('<!-- unknown change type: (' + change.type + ') for: ' + Group.id)
+                        console.log(Group)
                 }
             })
         })
     },
     /*
-    Connect and listen to a single meeting
+    Connect and listen to a single Group
     */
     async loadGroupListener({ context, commit }, GroupID) {
         commit('BAG_GROUP_SET', {})
@@ -80,68 +80,27 @@ const actions = {
                 return
             });
     },
-    /*
-        21-07-14:
-        All this does is add an item to the Group.Members or Group.Facilitators array
-        at this time. We'll need to link this to UserProfiles
-    */
-    async bagGroupMemberAdd({ state }, { GroupID, Member, isFacilitator }) {
-        // @TODO: do some validation here
-        if (!GroupID) {
-            console.log('Invalid GroupID')
-            return
-        }
-        if (!Member) {
-            console.log('If you do not pass a Member, we can not add them!')
-            return
-        }
-        // fetch the document
-        const bagGroupsRef = this.$fire.firestore.collection("bagGroups")
-        const groupRef = bagGroupsRef.doc(GroupID);
-        groupRef.get().then((doc) => {
-            if (doc.exists) {
-                const Group = doc.data()
-                if (isFacilitator) {
-                    Group.Facilitators.push(Member)
-                    groupRef.update({
-                        Facilitators: Group.Facilitators
-                    })
-                } else {
-                    Group.Members.push(Member)
-                    groupRef.update({
-                        Members: Group.Members
-                    })
-                }
-            } else {
-                // doc.data() will be undefined in this case
-                console.log("Invalid Group!");
-            }
-        }).catch((error) => {
-            console.log("Error getting document:", error);
-        });
-    },
-
 }
 const mutations = {
-    BAG_GROUPS_SET(state, groups) {
-        state.Groups = groups
+    BAG_GROUPS_SET(state, Groups) {
+        state.Groups = Groups
     },
-    BAG_GROUPS_ADD(state, group) {
-        state.Groups.push(group)
+    BAG_GROUPS_ADD(state, Group) {
+        state.Groups.push(Group)
     },
-    BAG_GROUPS_REMOVE(state, group) {
+    BAG_GROUPS_REMOVE(state, Group) {
         // filter the existing bagGroups.Groups to exclude the one to be removed
-        let NewGroups = this.state.bagGroups.Groups.filter(element => element.id != group.id)
+        let NewGroups = this.state.bagGroups.Groups.filter(element => element.id != Group.id)
         // set the state to this new array
         this.state.bagGroups.Groups = NewGroups
     },
-    BAG_GROUP_SET(state, group) {
-        state.Group = group
+    BAG_GROUP_SET(state, Group) {
+        state.Group = Group
     }
 }
 const getters = {
-    getByID: (state) => (groupID) => {
-        let tmpGroup = state.Groups.find(element => element.id === groupID)
+    getByID: (state) => (GroupID) => {
+        let tmpGroup = state.Groups.find(element => element.id === GroupID)
         if (!tmpGroup) { return {} }
         return tmpGroup
     },

@@ -79,7 +79,7 @@ export default {
       rulesDescription: [(v) => v.length <= 200 || 'Max 200 characters.'],
     }
   },
-  props: ['group', 'btnColor', 'btnTextColor', 'btnSize'],
+  props: ['Group', 'btnColor', 'btnTextColor', 'btnSize'],
   computed: {},
   methods: {
     async save() {
@@ -93,7 +93,7 @@ export default {
         Title: this.Title,
         Description: this.Description,
       }
-      let GroupID = this.group.id
+      let GroupID = this.Group.id
 
       this.$store.dispatch('bagGroups/bagGroupsUpdate', { GroupID, Group })
       this.dialog = false
@@ -105,8 +105,8 @@ export default {
   },
   created: function () {
     // assign it here so it's disconected from the store (prevents weird issues)
-    this.Title = this.group.Title
-    this.Description = this.group.Description
+    this.Title = this.Group.Title
+    this.Description = this.Group.Description
   },
 }
 </script>

@@ -12,13 +12,14 @@
     </template>
     <v-card>
       <v-toolbar color="#602034" rounded class="mb-2 white--text">
-        <v-toolbar-title>New Member for {{ group.Title }}</v-toolbar-title>
+        <v-toolbar-title>New Member for {{ Group.Title }}</v-toolbar-title>
       </v-toolbar>
       <v-card-text>
-        <v-form ref="newMember" v-model="valid" lazy-validation>
+        <v-form ref="newMember" v-model="valid">
           <v-card>
             <v-card-title>Member Info ({{ valid }})</v-card-title>
             <v-card-text>
+              <v-row>{{ Group }}</v-row>
               <v-row>
                 <v-spacer />
                 <v-col cols="12" sm="4">
@@ -142,7 +143,7 @@ export default {
       ],
     }
   },
-  props: ['group', 'btnColor', 'btnTextColor', 'btnSize'],
+  props: ['Group', 'GroupID', 'btnColor', 'btnTextColor', 'btnSize'],
   computed: {},
   methods: {
     async save() {
@@ -159,20 +160,21 @@ export default {
         Initials: this.Initials,
         Email: this.Email,
       }
-      let GroupID = this.group.id
-
+      let GroupID = this.GroupID
+      console.log('GroupID:' + this.GroupID)
+      console.log(this.Group)
+      console.log(Member)
       if (this.Membership === 'Member' || this.Membership === 'Both') {
-        this.$store.dispatch('bagGroups/bagGroupMemberAdd', {
+        this.$store.dispatch('bagMembers/Add', {
           GroupID,
           Member,
         })
       }
       if (this.Membership === 'Facilitator' || this.Membership === 'Both') {
         // add member to Group.Facilitators
-        this.$store.dispatch('bagGroups/bagGroupMemberAdd', {
+        this.$store.dispatch('bagFacilitators/Add', {
           GroupID,
           Member,
-          isFacilitator: true, // isFacilitator flag
         })
       }
 

@@ -13,7 +13,7 @@
     <v-card>
       <v-toolbar color="#602034" rounded class="mb-2 white--text">
         <v-toolbar-title
-          >Start BAG Meeting for {{ group.Title }}</v-toolbar-title
+          >Start BAG Meeting for {{ Group.Title }}</v-toolbar-title
         >
       </v-toolbar>
       <v-card-text>
@@ -113,7 +113,7 @@
                 <v-col cols="12" sm="5">
                   <v-select
                     v-model="Facilitator"
-                    :items="group.Facilitators"
+                    :items="Group.Facilitators"
                     item-text="DisplayName"
                     item-value="id"
                     return-object
@@ -123,7 +123,7 @@
                   ></v-select>
                   <v-select
                     v-model="Attendees"
-                    :items="group.Members"
+                    :items="Group.Members"
                     item-text="DisplayName"
                     item-value="id"
                     return-object
@@ -175,7 +175,7 @@ export default {
       rulesAttendees: [(v) => v.length > 0 || 'Select at least 1 Attendee'],
     }
   },
-  props: ['group', 'btnColor', 'btnTextColor', 'btnSize'],
+  props: ['Group', 'btnColor', 'btnTextColor', 'btnSize'],
   computed: {
     ...mapGetters(['CurrentUser']),
     MeetingDateTime() {
@@ -207,7 +207,7 @@ export default {
         return false
       }
       // create the Objects
-      let GroupID = this.group.id
+      let GroupID = this.Group.id
       let Meeting = this.Meeting
 
       // dispatch to save the record to FS
