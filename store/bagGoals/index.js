@@ -75,8 +75,12 @@ const actions = {
          Remove an existing Goal
     */
     async Remove({ context }, { GroupID, GoalID }) {
-        console.log('bagGoals.actions.Remove(GroupID, GoalID):' + GroupID + ':' + GoalID)
-        return
+        this.$fire.firestore.collection('bagGroups').doc(GroupID).collection('Goals').doc(GoalID)
+            .delete().then(() => {
+                console.log("Goal successfully deleted!");
+            }).catch((error) => {
+                console.error("Error removing document: ", error);
+            });
     }
 }
 const mutations = {

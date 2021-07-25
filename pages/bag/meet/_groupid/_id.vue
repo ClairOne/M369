@@ -228,7 +228,17 @@
                         {{ goal.Title }}
                         <v-spacer />
                       </td>
-                      <td class="text-center"></td>
+                      <td class="text-center">
+                        <v-chip
+                          v-if="goal.Status == 'New'"
+                          class="ma-2"
+                          color="error"
+                          outlined
+                          @click="removeGoal(goal)"
+                        >
+                          <v-icon> mdi-trash-can </v-icon>
+                        </v-chip>
+                      </td>
                     </tr>
                   </tbody>
                 </v-simple-table>
@@ -244,7 +254,6 @@
                   <v-toolbar-title>Sidebars</v-toolbar-title>
                 </v-toolbar>
                 <v-container>
-                  {{ validNewSidebar }}
                   <v-row>
                     <v-col>
                       <v-select
@@ -309,7 +318,17 @@
                         {{ sidebar.Reason }}
                         <v-spacer />
                       </td>
-                      <td class="text-center"></td>
+                      <td class="text-center">
+                        <v-chip
+                          v-if="sidebar.Status == 'New'"
+                          class="ma-2"
+                          color="error"
+                          outlined
+                          @click="removeSidebar(sidebar)"
+                        >
+                          <v-icon> mdi-trash-can </v-icon>
+                        </v-chip>
+                      </td>
                     </tr>
                   </tbody>
                 </v-simple-table>
@@ -510,7 +529,14 @@ export default {
       })
       this.GoalTitle = ''
     },
-    removeGoal: function () {},
+    removeGoal: function (goal) {
+      const GroupID = this.$route.params.groupid
+      const GoalID = goal.id
+      this.$store.dispatch('bagGoals/Remove', {
+        GroupID,
+        GoalID,
+      })
+    },
     addSidebar: function () {
       if (!this.validNewSidebar) {
         return
@@ -534,6 +560,16 @@ export default {
       this.$store.dispatch('bagSidebars/Add', {
         GroupID,
         Sidebar,
+      })
+      this.SidebarReason = ''
+      this.SidebarRequestedOf = {}
+    },
+    removeSidebar: function (sidebar) {
+      const GroupID = this.$route.params.groupid
+      const SidebarID = sidebar.id
+      this.$store.dispatch('bagSidebars/Remove', {
+        GroupID,
+        SidebarID,
       })
     },
     viewGroup: function (groupID) {

@@ -75,8 +75,12 @@ const actions = {
          Remove an existing Sidebar
     */
     async Remove({ context }, { GroupID, SidebarID }) {
-        console.log('bagSidebars.actions.Remove(GroupID, SidebarID):' + GroupID + ':' + SidebarID)
-        return
+        this.$fire.firestore.collection('bagGroups').doc(GroupID).collection('Sidebars').doc(SidebarID)
+            .delete().then(() => {
+                console.log("Sidebar successfully deleted!");
+            }).catch((error) => {
+                console.error("Error removing document: ", error);
+            });
     }
 }
 const mutations = {
