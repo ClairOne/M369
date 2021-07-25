@@ -193,7 +193,6 @@
                       label="Goal"
                       required
                     ></v-text-field>
-                    {{ validNewGoal }}
                     <v-spacer></v-spacer>
                     <v-btn
                       color="primary"
@@ -236,6 +235,88 @@
               </template>
             </v-container>
           </v-tab-item>
+          <!-- /Goals -->
+          <!-- Sidebars -->
+          <v-tab-item>
+            <v-container>
+              <v-card dense flat class="mx-auto">
+                <v-toolbar color="#a72f39" dark dense>
+                  <v-toolbar-title>Sidebars</v-toolbar-title>
+                </v-toolbar>
+                <v-container>
+                  {{ validNewSidebar }}
+                  <v-row>
+                    <v-col>
+                      <v-select
+                        v-model="SidebarRequestedOf"
+                        :items="Meeting.Attendees"
+                        item-text="DisplayName"
+                        item-value="Email"
+                        label="Requested Of"
+                        return-object
+                        single-line
+                      ></v-select>
+                    </v-col>
+                    <v-col>
+                      <v-text-field
+                        v-model="SidebarReason"
+                        label="Reason"
+                        required
+                      ></v-text-field>
+                    </v-col>
+                    <v-col>
+                      <v-btn
+                        color="primary"
+                        class="ma-2 white--text"
+                        @click="addSidebar()"
+                        :disabled="!validNewSidebar"
+                      >
+                        <v-icon> mdi-arrow-down-box </v-icon>
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-card>
+
+              <template>
+                <v-simple-table>
+                  <thead>
+                    <tr>
+                      <th class="text-center" width="10%">RequestedBy</th>
+                      <th class="text-center" width="10%">RequestedOf</th>
+                      <th class="text-center" width="10%">Status</th>
+                      <th class="text-left" width="50%">Reason</th>
+                      <th class="text-center">actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(sidebar, index) in attendeeSidebars"
+                      :key="index"
+                    >
+                      <td class="text-center">
+                        <v-chip class="ma-2" color="success" outlined
+                          >{{ sidebar.RequestedBy.Initials }}
+                        </v-chip>
+                      </td>
+                      <td class="text-center">
+                        <v-chip class="ma-2" color="success" outlined
+                          >{{ sidebar.RequestedOf.Initials }}
+                        </v-chip>
+                      </td>
+                      <td class="text-center">{{ sidebar.Status }}</td>
+                      <td class="text-left">
+                        {{ sidebar.Reason }}
+                        <v-spacer />
+                      </td>
+                      <td class="text-center"></td>
+                    </tr>
+                  </tbody>
+                </v-simple-table>
+              </template>
+            </v-container>
+          </v-tab-item>
+          <!-- /Sidebars -->
         </v-tabs-items>
       </v-col>
     </v-row>
@@ -252,13 +333,13 @@ export default {
   },
   data() {
     return {
-      selectedTab: 1, //@TODO: change this back to 0
+      selectedTab: 2, //@TODO: change this back to 0
       selectedAttendeeIndex: {},
 
       HighTitle: '',
       GoalTitle: '',
-      currentGoal: [],
-      currentSidebar: [],
+      SidebarReason: '',
+      SidebarRequestedOf: {},
     }
   },
   computed: {
@@ -266,6 +347,7 @@ export default {
       Group: (state) => state.bagGroups.Group,
       Meeting: (state) => state.bagMeetings.Meeting,
       Goals: (state) => state.bagGoals.Goals,
+      Sidebars: (state) => state.bagSidebars.Sidebars,
     }),
     selectedAttendee: function () {
       // changes the currentMember based on which item in the list is selected.
@@ -316,19 +398,19 @@ export default {
       return tmpGoals
     },
     attendeeSidebars() {
-      return []
       // should we filter or return them all?
-      if (!this.currentMember || !this.currentMember.id) {
-        return this.sidebars
+      if (!this.selectedAttendee || !this.selectedAttendee.Email) {
+        // no Email, return them all
+        return this.Sidebars
       }
 
-      // use this.Highs which is the full list
-      let tmpSidebars = this.sidebars
+      // use this.Sidebars which is the full list
+      let tmpSidebars = this.Sidebars
 
       tmpSidebars = tmpSidebars.filter((item) => {
         return (
-          item.RequestedBy.id == this.currentMember.id ||
-          item.RequestedOf.id == this.currentMember.id
+          item.RequestedBy.Email == this.selectedAttendee.Email ||
+          item.RequestedOf.Email == this.selectedAttendee.Email
         )
       })
       return tmpSidebars
@@ -349,6 +431,26 @@ export default {
         return false
       }
       if (!this.GoalTitle.length > 0) {
+        return false
+      }
+      return true
+    },
+    validNewSidebar() {
+      // use a negative trap approach for simplicity (@TODO: convert to using form validation)
+      // reason is required
+      if (!this.SidebarReason.length > 0) {
+        console.log(' no SidebarReason')
+        return false
+      }
+      // RequestedBy is the selectedAttendee
+      if (!this.selectedAttendee || !this.selectedAttendee.Email) {
+        console.log(' Invalid selectedAttendee (RequestedBy)')
+        return false
+      }
+      // RequestedOf is the selectBox
+      if (!this.SidebarRequestedOf || !this.SidebarRequestedOf.Email) {
+        console.log('Invalid SidebarRequestedOf')
+        console.log(this.SidebarRequestedOf)
         return false
       }
       return true
@@ -409,6 +511,31 @@ export default {
       this.GoalTitle = ''
     },
     removeGoal: function () {},
+    addSidebar: function () {
+      if (!this.validNewSidebar) {
+        return
+      }
+      const GroupID = this.$route.params.groupid
+      const MeetingID = this.$route.params.id
+      const Reason = this.SidebarReason
+      const RequestedBy = this.selectedAttendee
+      const RequestedOf = this.SidebarRequestedOf
+
+      const Sidebar = {
+        Reason: Reason,
+        RequestedBy: RequestedBy,
+        RequestedOf: RequestedOf,
+        Status: 'New',
+        Source: MeetingID,
+        SourceType: 'bagMeeting',
+      }
+      console.log('--> addSidebar:')
+      console.log(Sidebar)
+      this.$store.dispatch('bagSidebars/Add', {
+        GroupID,
+        Sidebar,
+      })
+    },
     viewGroup: function (groupID) {
       // redirect the UI to the group
       this.$router.push('/bag/group/' + groupID)
@@ -426,6 +553,8 @@ export default {
     })
     // load the Goals for this Group
     this.$store.dispatch('bagGoals/listenGoals', GroupID)
+    // load the Sidebars for this Group
+    this.$store.dispatch('bagSidebars/listenSidebars', GroupID)
   },
   async fetch({ store }) {},
 }
