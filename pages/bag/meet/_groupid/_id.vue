@@ -92,7 +92,7 @@
           </v-tab>
         </v-tabs>
         <v-tabs-items v-model="selectedTab">
-          <!-- Lows & Highs -->
+          <!-- Highs -->
           <v-tab-item>
             <v-container>
               <v-card dense flat class="mx-auto">
@@ -178,6 +178,64 @@
               </template>
             </v-container>
           </v-tab-item>
+          <!-- /Highs -->
+          <!-- Goals -->
+          <v-tab-item>
+            <v-container>
+              <v-card dense flat class="mx-auto">
+                <v-toolbar color="#a72f39" dark dense>
+                  <v-toolbar-title>Goals</v-toolbar-title>
+                </v-toolbar>
+                <v-container>
+                  <v-row class="pl-5 pr-5">
+                    <v-text-field
+                      v-model="GoalTitle"
+                      label="Goal"
+                      required
+                    ></v-text-field>
+                    {{ validNewGoal }}
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      color="primary"
+                      class="ma-2 white--text"
+                      @click="addGoal()"
+                      :disabled="!validNewGoal"
+                    >
+                      <v-icon> mdi-arrow-down-box </v-icon>
+                    </v-btn>
+                  </v-row>
+                </v-container>
+              </v-card>
+
+              <template>
+                <v-simple-table>
+                  <thead>
+                    <tr>
+                      <th class="text-center" width="10%">Member</th>
+                      <th class="text-center" width="10%">Status</th>
+                      <th class="text-left" width="50%">Goal</th>
+                      <th class="text-center">actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(goal, index) in attendeeGoals" :key="index">
+                      <td class="text-center">
+                        <v-chip class="ma-2" color="success" outlined
+                          >{{ goal.Member.Initials }}
+                        </v-chip>
+                      </td>
+                      <td class="text-center">{{ goal.Status }}</td>
+                      <td class="text-left">
+                        {{ goal.Title }}
+                        <v-spacer />
+                      </td>
+                      <td class="text-center"></td>
+                    </tr>
+                  </tbody>
+                </v-simple-table>
+              </template>
+            </v-container>
+          </v-tab-item>
         </v-tabs-items>
       </v-col>
     </v-row>
@@ -194,53 +252,11 @@ export default {
   },
   data() {
     return {
-      goals: [
-        {
-          id: 51,
-          Title: 'Goal #1',
-          IsHigh: true,
-          Member: { id: 8, Initials: 'DP' },
-        },
-        {
-          id: 52,
-          Title: 'Goal #2',
-          IsHigh: true,
-          Member: { id: 7, Initials: 'CA' },
-        },
-        {
-          id: 53,
-          Title: 'Goal #3',
-          IsHigh: false,
-          Member: { id: 2, Initials: 'OB' },
-        },
-      ],
-      sidebars: [
-        {
-          id: 41,
-          Reason: 'SB reason',
-          IsHigh: false,
-          RequestedBy: { id: 2, Initials: 'OB' },
-          RequestedOf: { id: 8, Initials: 'DP' },
-        },
-        {
-          id: 42,
-          Reason: 'SB reason',
-          IsHigh: false,
-          RequestedBy: { id: 7, Initials: 'CA' },
-          RequestedOf: { id: 8, Initials: 'DP' },
-        },
-        {
-          id: 43,
-          Reason: 'SB reason',
-          IsHigh: false,
-          RequestedBy: { id: 2, Initials: 'OB' },
-          RequestedOf: { id: 7, Initials: 'CA' },
-        },
-      ],
-      selectedTab: [],
+      selectedTab: 1, //@TODO: change this back to 0
       selectedAttendeeIndex: {},
 
-      HighTitle: [],
+      HighTitle: '',
+      GoalTitle: '',
       currentGoal: [],
       currentSidebar: [],
     }
@@ -249,6 +265,7 @@ export default {
     ...mapState({
       Group: (state) => state.bagGroups.Group,
       Meeting: (state) => state.bagMeetings.Meeting,
+      Goals: (state) => state.bagGoals.Goals,
     }),
     selectedAttendee: function () {
       // changes the currentMember based on which item in the list is selected.
@@ -283,19 +300,18 @@ export default {
       })
       return tmpHighs
     },
-
     attendeeGoals() {
-      return []
       // should we filter or return them all?
-      if (!this.currentMember || !this.currentMember.id) {
-        return this.goals
+      if (!this.selectedAttendee || !this.selectedAttendee.Email) {
+        // no Email, return them all
+        return this.Goals
       }
 
-      // use this.Highs which is the full list
-      let tmpGoals = this.goals
+      // use this.Goals which is the full list
+      let tmpGoals = this.Goals
 
       tmpGoals = tmpGoals.filter((item) => {
-        return item.Member.id == this.currentMember.id
+        return item.Member.Email == this.selectedAttendee.Email
       })
       return tmpGoals
     },
@@ -318,10 +334,21 @@ export default {
       return tmpSidebars
     },
     validNewHigh() {
+      // use a negative trap approach for simplicity (@TODO: convert to using form validation)
       if (!this.selectedAttendee || !this.selectedAttendee.Email) {
         return false
       }
       if (!this.HighTitle.length > 0) {
+        return false
+      }
+      return true
+    },
+    validNewGoal() {
+      // use a negative trap approach for simplicity (@TODO: convert to using form validation)
+      if (!this.selectedAttendee || !this.selectedAttendee.Email) {
+        return false
+      }
+      if (!this.GoalTitle.length > 0) {
         return false
       }
       return true
@@ -360,6 +387,28 @@ export default {
         High,
       })
     },
+    addGoal: function () {
+      if (!this.validNewGoal) {
+        return
+      }
+      const GroupID = this.$route.params.groupid
+      const MeetingID = this.$route.params.id
+      const goalMember = this.selectedAttendee
+      // build the goal
+      const Goal = {
+        Member: goalMember,
+        Title: this.GoalTitle,
+        Status: 'New',
+        SourceType: 'Meeting',
+        Source: MeetingID,
+      }
+      this.$store.dispatch('bagGoals/Add', {
+        GroupID,
+        Goal,
+      })
+      this.GoalTitle = ''
+    },
+    removeGoal: function () {},
     viewGroup: function (groupID) {
       // redirect the UI to the group
       this.$router.push('/bag/group/' + groupID)
@@ -369,12 +418,14 @@ export default {
     const GroupID = this.$route.params.groupid
     const MeetingID = this.$route.params.id
     // listen to the Group document
-    this.$store.dispatch('bagGroups/loadGroupListener', GroupID)
+    this.$store.dispatch('bagGroups/listenGroup', GroupID)
     // listen to the Meeting document
-    this.$store.dispatch('bagMeetings/loadMeetingListener', {
+    this.$store.dispatch('bagMeetings/listenMeeting', {
       GroupID,
       MeetingID,
     })
+    // load the Goals for this Group
+    this.$store.dispatch('bagGoals/listenGoals', GroupID)
   },
   async fetch({ store }) {},
 }

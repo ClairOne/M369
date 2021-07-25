@@ -1,11 +1,8 @@
 const actions = {
-    async connect({ context, dispatch }, force) {
+    async listenGroups({ commit }, { force = false }) {
         if (!force && this.state.bagGroups.Groups.length > 0) {
             return
         }
-        dispatch('listen')
-    },
-    async listen({ commit }) {
         commit('BAG_GROUPS_SET', [])
         this.$fire.firestore.collection('bagGroups').onSnapshot((res) => {
             const changes = res.docChanges()
@@ -34,14 +31,17 @@ const actions = {
     /*
     Connect and listen to a single Group
     */
-    async loadGroupListener({ context, commit }, GroupID) {
+    async listenGroup({ context, commit }, GroupID) {
         commit('BAG_GROUP_SET', {})
         this.$fire.firestore.collection('bagGroups').doc(GroupID)
             .onSnapshot((doc) => {
                 commit('BAG_GROUP_SET', doc.data())
             })
     },
-    async bagGroupsAdd({ state }, { Group }) {
+    /*
+        Create a new bagGroups document
+    */
+    async Add({ state }, { Group }) {
         // @TODO: do some validation here so we are not relying on the forms alone
         if (!Group) {
             console.log('If you do not pass a Group, we can not Add it!')
@@ -63,8 +63,10 @@ const actions = {
                 return
             });
     },
-
-    async bagGroupsUpdate({ state }, { GroupID, Group }) {
+    /*
+        Update an existing bagGroups document
+    */
+    async Update({ state }, { GroupID, Group }) {
         // @TODO: do some validation here so we are not relying on the forms alone
         if (!Group) {
             console.log('If you do not pass a Group, we can not Update it!')
@@ -80,6 +82,13 @@ const actions = {
                 return
             });
     },
+    /*
+        We don't do Remove at this time due to sub-collections
+    */
+    async Remove({ context }, { GroupID }) {
+        console.log('bagGroups.Remove(GroupID):' + GroupID)
+        return
+    }
 }
 const mutations = {
     BAG_GROUPS_SET(state, Groups) {
@@ -105,10 +114,12 @@ const getters = {
         return tmpGroup
     },
 }
-const state = {
+
+const state = () => ({
     Groups: [],
     Group: {},
-}
+})
+
 
 export default {
     state,

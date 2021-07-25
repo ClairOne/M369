@@ -161,9 +161,6 @@ export default {
         Email: this.Email,
       }
       let GroupID = this.GroupID
-      console.log('GroupID:' + this.GroupID)
-      console.log(this.Group)
-      console.log(Member)
       if (this.Membership === 'Member' || this.Membership === 'Both') {
         this.$store.dispatch('bagMembers/Add', {
           GroupID,

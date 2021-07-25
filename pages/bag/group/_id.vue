@@ -243,9 +243,11 @@ export default {
     //this.$store.dispatch('bagGroups/connect', false)
     let GroupID = this.$route.params.id
     this.GroupID = GroupID
-    this.$store.dispatch('bagGroups/loadGroupListener', GroupID)
-    this.$store.dispatch('bagMeetings/connect', GroupID)
-    this.$store.dispatch('bagMembers/connect', GroupID)
+    if (GroupID) {
+      this.$store.dispatch('bagGroups/listenGroup', GroupID)
+      this.$store.dispatch('bagMeetings/listenMeetings', GroupID)
+      this.$store.dispatch('bagMembers/listenMembers', GroupID)
+    }
   },
 }
 </script>

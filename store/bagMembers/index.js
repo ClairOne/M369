@@ -2,16 +2,7 @@ const actions = {
     /*
     Connects to Firestore for ALL Members for a single Group
     */
-    async connect({ context, dispatch }, GroupID) {
-        console.log('bagMembers.action.connect:GroupID=' + GroupID)
-        if (!GroupID) {
-            console.log('<!-- Invalid GroupID:' + GroupID)
-            return
-        }
-        dispatch('listen', GroupID)
-    },
-    async listen({ commit }, GroupID) {
-        console.log('bagMembers.action.listen:GroupID=' + GroupID)
+    async listenMembers({ commit }, GroupID) {
         // check the required input
         if (!GroupID) {
             return
@@ -80,7 +71,7 @@ const mutations = {
     },
     BAG_MEMBERS_REMOVE(state, Member) {
         // filter the existing bagGroups.Members to exclude the one to be removed
-        let NewMembers = this.state.Members.filter(element => element.id != Member.id)
+        let NewMembers = state.Members.filter(element => element.id != Member.id)
         // set the state to this new array
         state.Members = NewMembers
     },
@@ -95,10 +86,10 @@ const getters = {
         return tmpMember
     },
 }
-const state = {
+const state = () => ({
     Members: [],
     Member: {},
-}
+})
 
 export default {
     state,

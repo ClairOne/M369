@@ -1,21 +1,8 @@
 const actions = {
     /*
     Connects to Firestore for ALL Meetings for a single Group
-    - 21-07: It's a simple wrapper at the moment. It SHOULD check to see
-            if the connection for the group is already active to avoid
-            racking up Google Fees since the Meetings sub-collection
-            could grow substantially.
-            This MIGHT be a candidate for a static API call to a completed
-            Meetings storage at some point.
     */
-    async connect({ context, dispatch }, GroupID) {
-        if (!GroupID) {
-            console.log('<!-- Invalid GroupID:' + GroupID)
-            return
-        }
-        dispatch('listen', GroupID)
-    },
-    async listen({ commit }, GroupID) {
+    async listenMeetings({ commit }, GroupID, force = false) {
         // check the required input
         if (!GroupID) {
             return
@@ -48,7 +35,7 @@ const actions = {
     /*
     Connect and listen to a single meeting
     */
-    async loadMeetingListener({ commit }, { GroupID, MeetingID }) {
+    async listenMeeting({ commit }, { GroupID, MeetingID }) {
         commit('BAG_MEETING_SET', {})
         this.$fire.firestore.collection('bagGroups').doc(GroupID)
             .collection('Meetings').doc(MeetingID).onSnapshot((doc) => {
@@ -71,18 +58,28 @@ const actions = {
         }
         // insert a new meeting into the bagGroup subcollection
         this.$fire.firestore.collection('bagGroups').doc(GroupID)
-            .collection('Meetings').add(Meeting).then((doc) => {
+            .collection('Meetings').add(Meeting).then((docRef) => {
                 Meeting.id = docRef.id
             }).catch((error) => {
                 console.log("Error creating the meeting:", error);
             });
     },
+    /*
+        We don't do Remove at this time due to sub-collections
+    */
+    async Remove({ context }, { GroupID, MeetingID }) {
+        console.log('bagMeetings.Remove(GroupID, MeetingID):' + GroupID + ':' + MeetingID)
+        return
+    },
+    /*
+        Add a high map to the Meeting.Highs array
+    */
     async AddHigh({ commit }, { GroupID, MeetingID, newHigh }) {
         // fetch the document
         const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
-        meetingRef.get().then((doc) => {
-            if (doc.exists) {
-                const Meeting = doc.data()
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                const Meeting = docRef.data()
                 // here's where we insert the newHigh
                 Meeting.Highs.push(newHigh)
                 // update FS document (Firestore & Vuex handles the rest with the listeners)
@@ -90,19 +87,22 @@ const actions = {
                     Highs: Meeting.Highs
                 })
             } else {
-                // doc.data() will be undefined in this case
+                // docRef.data() will be undefined in this case
                 console.log("Invalid Meeting!");
             }
         }).catch((error) => {
             console.log("Error getting document:", error);
         });
     },
+    /*
+        Remove a High from the Meeting.Highs array
+    */
     async RemoveHigh({ context }, { GroupID, MeetingID, High }) {
         // fetch the document
         const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
-        meetingRef.get().then((doc) => {
-            if (doc.exists) {
-                const Meeting = doc.data()
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                const Meeting = docRef.data()
                 // let's build a new list of highs without the one to be removed
                 let tmpHighs = Meeting.Highs
                 tmpHighs = tmpHighs.filter((item) => {
@@ -114,7 +114,7 @@ const actions = {
                 })
                 // Vuex/Firestore takes care of the rest
             } else {
-                // doc.data() will be undefined in this case
+                // docRef.data() will be undefined in this case
                 console.log("Invalid Meeting!");
             }
         }).catch((error) => {
@@ -146,10 +146,10 @@ const getters = {
         return tmpMeeting
     },
 }
-const state = {
+const state = () => ({
     Meetings: [],
     Meeting: { Facilitator: {}, Attendees: [], Highs: [] },
-}
+})
 
 export default {
     state,
