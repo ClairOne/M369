@@ -35,7 +35,9 @@ const actions = {
         commit('BAG_GROUP_SET', {})
         this.$fire.firestore.collection('bagGroups').doc(GroupID)
             .onSnapshot((doc) => {
-                commit('BAG_GROUP_SET', doc.data())
+                let Group = doc.data()
+                Group.id = GroupID
+                commit('BAG_GROUP_SET', Group)
             })
     },
     /*

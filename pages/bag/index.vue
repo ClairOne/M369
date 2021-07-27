@@ -71,7 +71,7 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch('bagGroups/connect', false)
+    this.$store.dispatch('bagGroups/listenGroups', false)
   },
 }
 </script>

@@ -29,7 +29,7 @@
             <v-card class="mt-6">
               <v-toolbar color="#01937c" class="white--text" dense>
                 <v-icon color="white" class="mr-2">mdi-forum-outline</v-icon>
-                <v-toolbar-title>Open Meetings</v-toolbar-title>
+                <v-toolbar-title>Scheduled Meetings</v-toolbar-title>
                 <v-spacer />
                 <NEWMEETING
                   :Group="Group"
@@ -39,20 +39,20 @@
                 />
               </v-toolbar>
               <v-card-text>
-                <v-simple-table>
+                <v-simple-table dense>
                   <thead>
                     <tr>
                       <th class="text-left">Date/Time</th>
                       <th class="text-left">Facilitator</th>
                       <th class="text-center">Attendees</th>
-                      <th class="text-right">Status</th>
+                      <th class="text-right"></th>
                     </tr>
                   </thead>
 
                   <tbody>
                     <tr v-for="meeting in Meetings" :key="meeting.id">
                       <td class="text-left">
-                        {{ meeting.MeetingDate }}
+                        {{ meeting.MeetingDate }}<br />{{ meeting.MeetingTime }}
                       </td>
                       <td class="text-left">
                         {{ meeting.Facilitator.DisplayName }}
@@ -68,9 +68,31 @@
                         <span v-else>0</span>
                       </td>
                       <td class="text-right">
-                        <v-icon color="info" @click="viewMeeting(meeting.id)"
-                          >mdi-arrow-right-circle</v-icon
-                        >
+                        <v-tooltip top v-if="meeting.StartedAt">
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-icon
+                              color="info"
+                              @click="viewMeeting(meeting.id)"
+                              v-bind="attrs"
+                              v-on="on"
+                              >mdi-arrow-right-circle</v-icon
+                            >
+                          </template>
+                          <span>Continue the meeting.</span>
+                        </v-tooltip>
+
+                        <v-tooltip top v-else>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-icon
+                              color="success"
+                              @click="startMeeting(meeting.id)"
+                              v-bind="attrs"
+                              v-on="on"
+                              >mdi-clock-start</v-icon
+                            >
+                          </template>
+                          <span>Start the meeting.</span>
+                        </v-tooltip>
                       </td>
                     </tr>
                   </tbody>
@@ -96,7 +118,7 @@
               </v-toolbar>
 
               <v-card-text>
-                <v-simple-table>
+                <v-simple-table dense>
                   <thead>
                     <tr>
                       <th class="text-center" width="10%">Initials</th>
@@ -154,7 +176,7 @@
                 />
               </v-toolbar>
               <v-card-text>
-                <v-simple-table>
+                <v-simple-table dense>
                   <thead>
                     <tr>
                       <th class="text-center" width="10%">Initials</th>
@@ -236,6 +258,12 @@ export default {
     viewMeeting: function (meetingID) {
       // redirect the UI to the meeting
       this.$router.push('/bag/meet/' + this.$route.params.id + '/' + meetingID)
+    },
+    startMeeting: function (meetingID) {
+      // redirect to the start meeting wizard
+      this.$router.push(
+        '/bag/meeting/start/' + this.$route.params.id + '/' + meetingID
+      )
     },
   },
   mounted() {

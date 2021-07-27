@@ -21,7 +21,7 @@
         >
       </v-toolbar>
       <v-card-text>
-        <v-expansion-panels>
+        <v-expansion-panels v-if="Debug">
           <v-expansion-panel>
             <v-expansion-panel-header> Group </v-expansion-panel-header>
             <v-expansion-panel-content>
@@ -32,6 +32,18 @@
             <v-expansion-panel-header> Meeting </v-expansion-panel-header>
             <v-expansion-panel-content>
               {{ Meeting }}
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel>
+            <v-expansion-panel-header> Goals </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              {{ Goals }}
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel>
+            <v-expansion-panel-header> Sidebars </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              {{ Sidebars }}
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -102,7 +114,10 @@
               </thead>
 
               <tbody>
-                <tr v-for="goal in attendeeGoals" :key="goal.id">
+                <tr
+                  v-for="(goal, index) in attendeeGoals(attendee.Email)"
+                  :key="index"
+                >
                   <td class="text-left">{{ goal.Status }}</td>
                   <td class="text-left">{{ goal.Title }}</td>
                 </tr>
@@ -119,14 +134,21 @@
                 <tr>
                   <th class="text-left" width="20%">Requested By</th>
                   <th class="text-left" width="20%">Requested Of</th>
-                  <th class="text-center">Reson</th>
+                  <th class="text-left">Reson</th>
                 </tr>
               </thead>
 
               <tbody>
-                <tr v-for="sidebar in attendeeSidebars" :key="sidebar.id">
-                  <td class="text-left">{{ sidebar.RequestedBy }}</td>
-                  <td class="text-left">{{ sidebar.RequestedOf }}</td>
+                <tr
+                  v-for="(sidebar, index) in attendeeSidebars(attendee.Email)"
+                  :key="index"
+                >
+                  <td class="text-left">
+                    {{ sidebar.RequestedBy.DisplayName }}
+                  </td>
+                  <td class="text-left">
+                    {{ sidebar.RequestedOf.DisplayName }}
+                  </td>
                   <td class="text-left">{{ sidebar.Reason }}</td>
                 </tr>
               </tbody>
@@ -149,16 +171,18 @@ import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
 export default {
   data: () => ({
     dialog: false,
+    Debug: false,
   }),
-  props: ['Meeting', 'Group', 'btnColor', 'btnTextColor', 'btnSize'],
-  computed: {
-    attendeeGoals: function () {
-      return []
-    },
-    attendeeSidebars: function () {
-      return []
-    },
-  },
+  props: [
+    'Group',
+    'Meeting',
+    'Goals',
+    'Sidebars',
+    'btnColor',
+    'btnTextColor',
+    'btnSize',
+  ],
+  computed: {},
   methods: {
     attendeeHighs(AttendeeEmail) {
       // should we filter or return them all?
@@ -174,6 +198,39 @@ export default {
         return item.MemberEmail == AttendeeEmail
       })
       return tmpHighs
+    },
+    attendeeGoals(AttendeeEmail) {
+      // should we filter or return them all?
+      if (!AttendeeEmail) {
+        // no Email, return them all
+        return this.Goals
+      }
+
+      // use this.Goals which is the full list
+      let tmpGoals = this.Goals
+
+      tmpGoals = tmpGoals.filter((item) => {
+        return item.Member.Email == AttendeeEmail
+      })
+      return tmpGoals
+    },
+    attendeeSidebars(AttendeeEmail) {
+      // should we filter or return them all?
+      if (!AttendeeEmail) {
+        // no Email, return them all
+        return this.Sidebars
+      }
+
+      // use this.Sidebars which is the full list
+      let tmpSidebars = this.Sidebars
+
+      tmpSidebars = tmpSidebars.filter((item) => {
+        return (
+          item.RequestedBy.Email == AttendeeEmail ||
+          item.RequestedOf.Email == AttendeeEmail
+        )
+      })
+      return tmpSidebars
     },
   },
 }

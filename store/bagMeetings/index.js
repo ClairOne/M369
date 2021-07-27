@@ -39,8 +39,9 @@ const actions = {
         commit('BAG_MEETING_SET', {})
         this.$fire.firestore.collection('bagGroups').doc(GroupID)
             .collection('Meetings').doc(MeetingID).onSnapshot((doc) => {
-                var Meeting = doc.data()
-                commit('BAG_MEETING_SET', doc.data())
+                let Meeting = doc.data()
+                Meeting.id = MeetingID
+                commit('BAG_MEETING_SET', Meeting)
             })
     },
     /*
@@ -72,13 +73,110 @@ const actions = {
         return
     },
     /*
-        Add a high map to the Meeting.Highs array
+        Assign the Facilitator
     */
-    async AddHigh({ commit }, { GroupID, MeetingID, newHigh }) {
+    async AssignFacilitator({ commit }, { GroupID, MeetingID, Facilitator }) {
+        if (!GroupID) { return }
+        if (!MeetingID) { return }
+        if (!Facilitator || !Facilitator.Email) { return }
         // fetch the document
         const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
         meetingRef.get().then((docRef) => {
             if (docRef.exists) {
+                // Build the facilitator @TODO: create a generic function for this to ensure map standardization
+                const tmpFacilitator = {
+                    DisplayName: Facilitator.DisplayName,
+                    Email: Facilitator.Email,
+                    FirstName: Facilitator.FirstName,
+                    Initials: Facilitator.Initials,
+                    LastName: Facilitator.LastName,
+                }
+                // update FS document (Firestore & Vuex handles the rest with the listeners)
+                meetingRef.update({
+                    Facilitator: tmpFacilitator
+                })
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+    /*
+        Assign the Facilitator
+    */
+    async AddAttendee({ commit }, { GroupID, MeetingID, Attendee }) {
+        if (!GroupID || !MeetingID || !Attendee || !Attendee.Email) { return }
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                // Build the facilitator @TODO: create a generic function for this to ensure map standardization
+                const newAttendee = {
+                    DisplayName: Attendee.DisplayName,
+                    Email: Attendee.Email,
+                    FirstName: Attendee.FirstName,
+                    Initials: Attendee.Initials,
+                    LastName: Attendee.LastName,
+                }
+                const Meeting = docRef.data()
+                // here's where we insert the attendee
+                Meeting.Attendees.push(newAttendee)
+                // update FS document (Firestore & Vuex handles the rest with the listeners)
+                meetingRef.update({
+                    Attendees: Meeting.Attendees
+                })
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+    /*
+        Remove an Attendee from the Meeting.Attendees array
+    */
+    async RemoveAttendee({ context }, { GroupID, MeetingID, Attendee }) {
+        if (!GroupID || !MeetingID || !Attendee || !Attendee.Email) { return }
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                const Meeting = docRef.data()
+                // let's build a new list of Attendees without the one to be removed
+                let tmpAttendees = Meeting.Attendees
+                tmpAttendees = tmpAttendees.filter((item) => {
+                    return (item.Email != Attendee.Email)
+                })
+                // update FS document (Firestore & Vuex handles the rest with the listeners)
+                meetingRef.update({
+                    Attendees: tmpAttendees
+                })
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+    /*
+        Add a high map to the Meeting.Highs array
+    */
+    async AddHigh({ context }, { GroupID, MeetingID, High }) {
+        if (!GroupID || !MeetingID || !High) { return }
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                // Build the Attendee @TODO: create a generic function for this to ensure map standardization
+                const newHigh = {
+                    IsHigh: High.IsHigh,
+                    Member: High.Member, //@TODO: this is where it would be nice to call that function I mentioned above
+                    Title: High.Title,
+                }
                 const Meeting = docRef.data()
                 // here's where we insert the newHigh
                 Meeting.Highs.push(newHigh)
@@ -98,6 +196,7 @@ const actions = {
         Remove a High from the Meeting.Highs array
     */
     async RemoveHigh({ context }, { GroupID, MeetingID, High }) {
+        if (!GroupID || !MeetingID || !High) { return }
         // fetch the document
         const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
         meetingRef.get().then((docRef) => {

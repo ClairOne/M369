@@ -20,6 +20,8 @@
             <MEETINGREPORT
               v-bind:Group="Group"
               v-bind:Meeting="Meeting"
+              v-bind:Goals="Goals"
+              v-bind:Sidebars="Sidebars"
               btnColor="white"
               btnTextColor="#01937c"
               btnSize="24"
