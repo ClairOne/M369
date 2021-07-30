@@ -28,6 +28,17 @@
               {{ Meeting.Facilitator.DisplayName }}
             </p>
           </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn
+              @click="startMeeting()"
+              :disabled="!IsStarted && !IsReadyToStart()"
+              color="success"
+            >
+              Start
+            </v-btn>
+            <v-spacer />
+          </v-card-actions>
         </v-card>
         <v-card class="mx-auto" dense>
           <v-toolbar color="#602034" rounded class="mb-2 white--text" dense>
@@ -100,8 +111,8 @@
             <v-stepper-content step="2">
               <ATTENDEERSELECTOR />
             </v-stepper-content>
-            <v-stepper-content step="3"> Previous Goals </v-stepper-content>
-            <v-stepper-content step="4"> Previous Sidebars </v-stepper-content>
+            <v-stepper-content step="3"><GOALSELECTOR /></v-stepper-content>
+            <v-stepper-content step="4"><SIDEBARSELECTOR /></v-stepper-content>
           </v-stepper-items>
         </v-stepper>
       </v-col>
@@ -113,12 +124,17 @@
 import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
 import FACILITATORSELECTOR from '../../../../../components/bag/meeting/selectFacilitator.vue'
 import ATTENDEERSELECTOR from '../../../../../components/bag/meeting/selectAttendees.vue'
+import GOALSELECTOR from '../../../../../components/bag/meeting/selectGoals.vue'
+import SIDEBARSELECTOR from '../../../../../components/bag/meeting/selectSidebars.vue'
 export default {
-  components: { FACILITATORSELECTOR, ATTENDEERSELECTOR },
+  components: {
+    FACILITATORSELECTOR,
+    ATTENDEERSELECTOR,
+    GOALSELECTOR,
+    SIDEBARSELECTOR,
+  },
   data() {
-    return {
-      selectedTab: 0,
-    }
+    return {}
   },
   computed: {
     ...mapState({
@@ -164,11 +180,53 @@ export default {
       }
       return false
     },
+    IsStarted() {
+      // we use this to redirect at any time the underlying Meeting.StartedAt value is set
+      if (!this.Meeting || !this.Meeting.StartedAt) {
+        return false
+      }
+      const GroupID = this.$route.params.groupid
+      const MeetingID = this.$route.params.id
+      // Meeting.StartedAt IS set, redirect
+      this.$router.push('/bag/meeting/' + GroupID + '/' + MeetingID)
+    },
   },
   methods: {
     viewGroup: function (groupID) {
       // redirect the UI to the group
       this.$router.push('/bag/group/' + groupID)
+    },
+    startMeeting: function () {
+      const GroupID = this.$route.params.groupid
+      const MeetingID = this.$route.params.id
+      const Meeting = this.Meeting
+      console.log('startMeeting')
+      console.log('GroupID:' + GroupID)
+      console.log('MeetingID:' + MeetingID)
+      console.log('Meeting:')
+      console.log(Meeting)
+
+      // update the Meeting record
+      this.$store.dispatch('bagMeetings/Start', { GroupID, MeetingID })
+    },
+    IsReadyToStart: function () {
+      if (!this.Meeting) {
+        return false
+      }
+      // valid facilitator?
+      if (!this.validFacilitator) {
+        return false
+      }
+      if (!this.validAttendees) {
+        return false
+      }
+      if (!this.validGoals) {
+        return false
+      }
+      if (!this.validSidebars) {
+        return false
+      }
+      return true
     },
   },
   async mounted() {

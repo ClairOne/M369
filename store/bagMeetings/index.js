@@ -219,7 +219,35 @@ const actions = {
         }).catch((error) => {
             console.log("Error getting document:", error);
         });
-    }
+    },
+    /*
+        Sets the StartedAt timestamp
+    */
+    async Start({ context }, { GroupID, MeetingID }) {
+        if (!GroupID || !MeetingID) { return }
+        // create the timestamp (we don't want to use the format used by FS)
+        const current = new Date()
+        const tmpStartedAt = `${current.getFullYear()}-${current.getMonth() + 1
+            }-${current.getDate()} ${current.getHours()}:${current.getMinutes()}`
+
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                const Meeting = docRef.data()
+                // here's where we actually update the Meeting
+                meetingRef.update({
+                    StartedAt: tmpStartedAt
+                })
+                // Vuex/Firestore takes care of the rest
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
 }
 const mutations = {
     BAG_MEETINGS_SET(state, meetings) {
