@@ -60,9 +60,12 @@ export default {
   },
   methods: {
     assignFacilitator: function (facilitator) {
+      // if the meeting doesn't have a Facilitator
+      // or the Facilitator is different than the one passed in
       if (
-        this.Meeting.Facilitator &&
-        facilitator.Email != this.Meeting.Facilitator.Email
+        !this.Meeting.Facilitator ||
+        (this.Meeting.Facilitator &&
+          facilitator.Email != this.Meeting.Facilitator.Email)
       ) {
         const GroupID = this.Group.id
         const MeetingID = this.Meeting.id

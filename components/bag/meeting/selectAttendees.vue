@@ -30,11 +30,6 @@
             </template>
           </tbody>
         </v-simple-table>
-        <h3>Group Members</h3>
-        {{ Members }}
-        <v-divider />
-        <h3>Attendees</h3>
-        {{ Meeting.Attendees }}
       </v-card-text>
     </v-card>
   </v-container>

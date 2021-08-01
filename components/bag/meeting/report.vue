@@ -190,7 +190,10 @@ export default {
         // no Email, return them all
         return this.Meeting.Highs
       }
-
+      // if there are no Meeting.Highs then return an empty array
+      if (!this.Meeting.Highs) {
+        return []
+      }
       // use this.Meeting.Highs which is the full list
       let tmpHighs = this.Meeting.Highs
 
@@ -205,7 +208,6 @@ export default {
         // no Email, return them all
         return this.Goals
       }
-
       // use this.Goals which is the full list
       let tmpGoals = this.Goals
 

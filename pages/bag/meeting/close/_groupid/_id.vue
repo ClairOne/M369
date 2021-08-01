@@ -7,7 +7,7 @@
             @click="bottomSheet = !bottomSheet"
           ></v-app-bar-nav-icon>
           <v-spacer />
-          <v-toolbar-title> Meeting {{ selectedTab }}</v-toolbar-title>
+          <v-toolbar-title> Meeting </v-toolbar-title>
           <v-spacer></v-spacer>
         </v-toolbar>
       </v-row>
@@ -15,21 +15,17 @@
         <v-col cols="12" md="3">
           <v-container>
             <v-tabs v-model="selectedTab" grow vertical>
-              <v-tab class="text-left">
-                Facilitator
-                <v-icon v-if="validFacilitator">mdi-check</v-icon>
-              </v-tab>
               <v-tab>
-                Attendees
-                <v-icon v-if="validAttendees">mdi-check</v-icon>
+                Lows &amp; Highs
+                <v-icon>mdi-arrow-top-right-bottom-left-bold</v-icon>
               </v-tab>
               <v-tab>
                 Goals
-                <v-icon v-if="validGoals">mdi-check</v-icon>
+                <v-icon>mdi-bullseye-arrow</v-icon>
               </v-tab>
               <v-tab>
                 Sidebars
-                <v-icon v-if="validSidebars">mdi-check</v-icon>
+                <v-icon>mdi-chat-plus-outline</v-icon>
               </v-tab>
             </v-tabs>
           </v-container>
@@ -64,30 +60,139 @@
         </v-col>
         <v-col cols="12" md="9">
           <v-tabs-items v-model="selectedTab">
-            <!-- Facilitator -->
+            <!-- Highs -->
             <v-tab-item>
               <v-card class="mx-auto">
                 <v-toolbar color="#a72f39" dark dense>
-                  <v-toolbar-title>Facilitator</v-toolbar-title>
+                  <v-toolbar-title>Highs &amp; Lows</v-toolbar-title>
                 </v-toolbar>
                 <v-card-text>
-                  <FACILITATORSELECTOR />
+                  <v-container
+                    v-for="(attendee, index) in Meeting.Attendees"
+                    :key="index"
+                  >
+                    <v-toolbar rounded dense color="secondary" dark>{{
+                      attendee.DisplayName
+                    }}</v-toolbar>
+                    <v-row>
+                      <v-col cols="12" md="6">
+                        <v-container>
+                          <v-card rounded dense>
+                            <v-card-title
+                              >Meeting Highs
+                              <v-spacer />
+                              <v-btn
+                                color="success"
+                                @click="setCurrentHighs(attendee)"
+                              >
+                                Make Current</v-btn
+                              >
+                            </v-card-title>
+                            <v-card-text>
+                              <v-simple-table>
+                                <thead>
+                                  <tr>
+                                    <th class="text-center" width="10%">H/L</th>
+                                    <th class="text-left" width="50%">
+                                      Description
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr
+                                    v-for="(
+                                      high, index
+                                    ) in attendeeMeetingHighs(attendee)"
+                                    :key="index"
+                                  >
+                                    <td class="text-center">
+                                      <v-chip
+                                        v-if="high.IsHigh"
+                                        class="ma-2"
+                                        color="success"
+                                        outlined
+                                      >
+                                        <v-icon> mdi-arrow-up-box </v-icon>
+                                      </v-chip>
+
+                                      <v-chip
+                                        v-else
+                                        class="ma-2"
+                                        color="error"
+                                        outlined
+                                      >
+                                        <v-icon> mdi-arrow-down-box </v-icon>
+                                      </v-chip>
+                                    </td>
+                                    <td class="text-left">
+                                      {{ high.Title }}
+                                      <v-spacer />
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </v-simple-table>
+                            </v-card-text>
+                          </v-card>
+                        </v-container>
+                      </v-col>
+                      <v-col cols="12" md="6">
+                        <v-container>
+                          <v-card rounded dense>
+                            <v-card-title>Current Highs </v-card-title>
+                            <v-card-text>
+                              <v-simple-table>
+                                <thead>
+                                  <tr>
+                                    <th class="text-center" width="10%">H/L</th>
+                                    <th class="text-left" width="50%">
+                                      Description
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr
+                                    v-for="(
+                                      high, index
+                                    ) in attendeeCurrentHighs(attendee)"
+                                    :key="index"
+                                  >
+                                    <td class="text-center">
+                                      <v-chip
+                                        v-if="high.IsHigh"
+                                        class="ma-2"
+                                        color="success"
+                                        outlined
+                                      >
+                                        <v-icon> mdi-arrow-up-box </v-icon>
+                                      </v-chip>
+
+                                      <v-chip
+                                        v-else
+                                        class="ma-2"
+                                        color="error"
+                                        outlined
+                                      >
+                                        <v-icon> mdi-arrow-down-box </v-icon>
+                                      </v-chip>
+                                    </td>
+                                    <td class="text-left">
+                                      {{ high.Title }}
+                                      <v-spacer />
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </v-simple-table>
+                            </v-card-text>
+                          </v-card>
+                        </v-container>
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                  <template> </template>
                 </v-card-text>
               </v-card>
             </v-tab-item>
-            <!-- /Facilitator -->
-            <!-- Attendees -->
-            <v-tab-item>
-              <v-card class="mx-auto">
-                <v-toolbar color="#a72f39" dark dense>
-                  <v-toolbar-title>Attendees</v-toolbar-title>
-                </v-toolbar>
-                <v-card-text>
-                  <ATTENDEERSELECTOR />
-                </v-card-text>
-              </v-card>
-            </v-tab-item>
-            <!-- /Attendees -->
+            <!-- /Highs -->
             <!-- Goals -->
             <v-tab-item>
               <v-card class="mx-auto">
@@ -107,50 +212,15 @@
                         <v-container>
                           <v-card rounded dense>
                             <v-card-title
-                              >Current Goals
+                              >Meeting Goals
                               <v-spacer />
                               <v-btn
                                 color="success"
-                                @click="addMeetingGoals(attendee)"
+                                @click="setCurrentGoals(attendee)"
                               >
-                                Add to Meeting</v-btn
+                                Make Current</v-btn
                               >
                             </v-card-title>
-                            <v-card-text>
-                              <v-simple-table>
-                                <thead>
-                                  <tr>
-                                    <th class="text-left" width="20%">
-                                      Status
-                                    </th>
-                                    <th class="text-left" width="80%">Goal</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <tr
-                                    v-for="(
-                                      goal, index
-                                    ) in attendeeCurrentGoals(attendee)"
-                                    :key="index"
-                                  >
-                                    <td class="text-left">
-                                      {{ goal.Status }}
-                                    </td>
-                                    <td class="text-left">
-                                      {{ goal.Title }}
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </v-simple-table>
-                            </v-card-text>
-                          </v-card>
-                        </v-container>
-                      </v-col>
-
-                      <v-col cols="12" md="6">
-                        <v-container>
-                          <v-card rounded dense>
-                            <v-card-title>Meeting Goals </v-card-title>
                             <v-card-text>
                               <v-simple-table>
                                 <thead>
@@ -181,8 +251,43 @@
                           </v-card>
                         </v-container>
                       </v-col>
+                      <v-col cols="12" md="6">
+                        <v-container>
+                          <v-card rounded dense>
+                            <v-card-title>Current Goals </v-card-title>
+                            <v-card-text>
+                              <v-simple-table>
+                                <thead>
+                                  <tr>
+                                    <th class="text-left" width="20%">
+                                      Status
+                                    </th>
+                                    <th class="text-left" width="80%">Goal</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr
+                                    v-for="(
+                                      goal, index
+                                    ) in attendeeCurrentGoals(attendee)"
+                                    :key="index"
+                                  >
+                                    <td class="text-left">
+                                      {{ goal.Status }}
+                                    </td>
+                                    <td class="text-left">
+                                      {{ goal.Title }}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </v-simple-table>
+                            </v-card-text>
+                          </v-card>
+                        </v-container>
+                      </v-col>
                     </v-row>
                   </v-container>
+                  <template> </template>
                 </v-card-text>
               </v-card>
             </v-tab-item>
@@ -206,14 +311,61 @@
                         <v-container>
                           <v-card rounded dense>
                             <v-card-title
-                              >Current Sidebars
+                              >Meeting Sidebars
                               <v-spacer />
                               <v-btn
                                 color="success"
-                                @click="addMeetingSidebars(attendee)"
-                                >Add to Meeting</v-btn
+                                @click="setCurrentSidebars(attendee)"
+                              >
+                                Make Current</v-btn
                               >
                             </v-card-title>
+                            <v-card-text>
+                              <v-simple-table>
+                                <thead>
+                                  <tr>
+                                    <th class="text-left" width="30%">
+                                      RequestedBy
+                                    </th>
+                                    <th class="text-left" width="30%">
+                                      RequestedOf
+                                    </th>
+                                    <th class="text-left" width="40%">
+                                      Reason
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr
+                                    v-for="(
+                                      sidebar, index
+                                    ) in attendeeMeetingSidebars(attendee)"
+                                    :key="index"
+                                  >
+                                    <td class="text-left">
+                                      <span v-if="sidebar.RequestedBy">
+                                        {{ sidebar.RequestedBy.DisplayName }}
+                                      </span>
+                                    </td>
+                                    <td class="text-left">
+                                      <span v-if="sidebar.RequestedOf">
+                                        {{ sidebar.RequestedOf.DisplayName }}
+                                      </span>
+                                    </td>
+                                    <td class="text-left">
+                                      {{ sidebar.Reason }}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </v-simple-table>
+                            </v-card-text>
+                          </v-card>
+                        </v-container>
+                      </v-col>
+                      <v-col cols="12" md="6">
+                        <v-container>
+                          <v-card rounded dense>
+                            <v-card-title>Current Sidebars </v-card-title>
                             <v-card-text>
                               <v-simple-table>
                                 <thead>
@@ -256,52 +408,6 @@
                           </v-card>
                         </v-container>
                       </v-col>
-                      <v-col cols="12" md="6">
-                        <v-container>
-                          <v-card rounded dense>
-                            <v-card-title>Meeting Sidebars </v-card-title>
-                            <v-card-text>
-                              <v-simple-table>
-                                <thead>
-                                  <tr>
-                                    <th class="text-left" width="30%">
-                                      RequestedBy
-                                    </th>
-                                    <th class="text-left" width="30%">
-                                      RequestedOf
-                                    </th>
-                                    <th class="text-left" width="40%">
-                                      Reason
-                                    </th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <tr
-                                    v-for="(
-                                      sidebar, index
-                                    ) in attendeeMeetingSidebars(attendee)"
-                                    :key="index"
-                                  >
-                                    <td class="text-left">
-                                      <span v-if="sidebar.RequestedBy">
-                                        {{ sidebar.RequestedBy.DisplayName }}
-                                      </span>
-                                    </td>
-                                    <td class="text-left">
-                                      <span v-if="sidebar.RequestedOf">
-                                        {{ sidebar.RequestedOf.DisplayName }}
-                                      </span>
-                                    </td>
-                                    <td colspan="2" class="text-left">
-                                      {{ sidebar.Reason }}
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </v-simple-table>
-                            </v-card-text>
-                          </v-card>
-                        </v-container>
-                      </v-col>
                     </v-row>
                   </v-container>
                   <template> </template>
@@ -313,7 +419,6 @@
         </v-col>
       </v-row>
     </template>
-
     <template>
       <v-bottom-sheet v-model="bottomSheet">
         <v-card>
@@ -338,12 +443,12 @@
               </v-col>
 
               <v-col cols="12" md="3">
-                <v-btn
-                  @click="startMeeting()"
-                  :disabled="!IsStarted && !IsReadyToStart()"
-                  color="success"
-                  >Start</v-btn
-                >
+                <v-btn color="warning" @click="runMeeting()" dense>
+                  Run Meeting
+                </v-btn>
+                <v-btn color="success" @click="closeMeeting()" dense>
+                  End Meeting
+                </v-btn>
               </v-col>
             </v-row>
           </v-card-text>
@@ -355,17 +460,12 @@
 
 <script>
 import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
-import FACILITATORSELECTOR from '../../../../../components/bag/meeting/selectFacilitator.vue'
-import ATTENDEERSELECTOR from '../../../../../components/bag/meeting/selectAttendees.vue'
 export default {
-  components: {
-    FACILITATORSELECTOR,
-    ATTENDEERSELECTOR,
-  },
+  components: {},
   data() {
     return {
       bottomSheet: false,
-      selectedTab: 2,
+      selectedTab: 0,
       selectedAttendeeIndex: {},
     }
   },
@@ -375,69 +475,23 @@ export default {
       Meeting: (state) => state.bagMeetings.Meeting,
       Members: (state) => state.bagMembers.Members,
     }),
-
-    validFacilitator() {
-      const Facilitator = this.Meeting.Facilitator
-      if (Facilitator && Facilitator.DisplayName) {
-        return true
-      }
-      return false
-    },
-    validAttendees() {
-      const Attendees = this.Meeting.Attendees
-      if (Attendees && Attendees.length > 0) {
-        return true
-      }
-      return false
-    },
-    validGoals() {
-      const PreviousGoals = this.Group.CurrentGoals
-      const CurrentGoals = this.Meeting.Goals
-      if (!PreviousGoals || PreviousGoals.length == 0) {
-        return true
-      }
-      if (CurrentGoals && CurrentGoals.length > 0) {
-        return true
-      }
-      return false
-    },
-    validSidebars() {
-      const PreviousSidebars = this.Group.CurrentSidebars
-      const CurrentSidebars = this.Meeting.Sidebars
-      if (!PreviousSidebars || PreviousSidebars.length == 0) {
-        return true
-      }
-      if (CurrentSidebars && CurrentSidebars.length > 0) {
-        return true
-      }
-      return false
-    },
-    /*
-        This servers 2 purposes:
-        1: Enable/Disable the Start Meeting button in the bottom-sheet
-        2: Redirect to the appropriate screen
-            based on the StartedAt and ClosedAt values of the Meeting
-    */
-    IsStarted() {
-      // If the meeting isn't loaded yet, it isn't started...
+    IsClosed() {
+      // we use this to redirect based on the underlying conditions of Meeting.StartedAt and Meeting.EndedAt
+      // if the meeting hasn't loaded yet, just ignore this
       if (!this.Meeting) {
         return false
       }
       const GroupID = this.$route.params.groupid
       const MeetingID = this.$route.params.id
-      // has it been closed?
-      if (this.Meeting.ClosedAt) {
-        console.log('IsStarted: Meeting has been closed')
-        // Meeting.ClosedAt IS set, redirect
+      // if the meeting HAS loaded and StartedAt has not been set, return to start
+      if (this.Meeting && !this.Meeting.StartedAt) {
+        this.$router.push('/bag/meeting/start/' + GroupID + '/' + MeetingID)
+      }
+      // if the meeting has ENDED then redirect to the report
+      if (this.Meeting && this.Meeting.ClosedAt) {
         this.$router.push('/bag/meeting/report/' + GroupID + '/' + MeetingID)
       }
-      // has it been started?
-      if (this.Meeting.StartedAt) {
-        console.log('IsStarted: Meeting has been started')
-        this.$router.push('/bag/meeting/' + GroupID + '/' + MeetingID)
-      }
-      // It's loaded, not closed, and not started, so...
-      return false
+      return true
     },
   },
   methods: {
@@ -445,35 +499,106 @@ export default {
       // redirect the UI to the group
       this.$router.push('/bag/group/' + groupID)
     },
-    /*
-        Sets the StartedAt timestamp for the Meeting
-    */
-    startMeeting: function () {
-      const tmpDate = new Date()
-      const tmpCreatedAt = `${tmpDate.getFullYear()}-${
-        tmpDate.getMonth() + 1
-      }-${tmpDate.getDate()} ${tmpDate.getHours()}:${(
-        '0' + tmpDate.getMinutes()
-      ).slice(-2)}`
+    runMeeting: function () {
+      const GroupID = this.$route.params.groupid
+      const MeetingID = this.$route.params.id
+      // redirect
+      this.$router.push('/bag/meeting/' + GroupID + '/' + MeetingID)
+    },
+    closeMeeting: function () {
       const GroupID = this.$route.params.groupid
       const MeetingID = this.$route.params.id
       const Meeting = this.Meeting
-      console.log('startMeeting')
+      console.log('closeMeeting')
       console.log('GroupID:' + GroupID)
       console.log('MeetingID:' + MeetingID)
       console.log('Meeting:')
       console.log(Meeting)
 
       // update the Meeting record
-      this.$store.dispatch('bagMeetings/Start', { GroupID, MeetingID })
+      this.$store.dispatch('bagMeetings/Close', { GroupID, MeetingID })
+    },
+    /*
+        takes an email address and returns the corresponding bagGroups.Member
+    */
+    getMemberByEmail: function (email) {
+      if (!email) {
+        return {}
+      }
+      // get the Member from Members
+      let Members = this.Members
+      // did we find some members?
+      if (!Members) {
+        console.log('No group members')
+        return {}
+      }
+      let Member = this.Members.find((element) => element.Email === email)
+      // did we find the Member match?
+      if (!Member) {
+        return {}
+      }
+      return Member
     },
     /*
         ===== HIGHS =====
-        this is a placeholder for future use
     */
-    attendeeMeetingHighs: function () {},
-    attendeeCurrentHighs: function () {},
-    setMeetingHighs: function () {},
+    /*
+        Filter the Meeting.Highs for a specific Attendee
+    */
+    attendeeMeetingHighs: function (attendee) {
+      if (!attendee || !attendee.Email) {
+        return []
+      }
+      // are there any Highs in the Meeting, yet?
+      if (!this.Meeting.Highs || this.Meeting.Highs.length === 0) {
+        return []
+      }
+      // use this.Meeting.Highs which is the full list
+      let tmpHighs = this.Meeting.Highs
+
+      tmpHighs = tmpHighs.filter((item) => {
+        return item.Member.Email == attendee.Email
+      })
+      return tmpHighs
+    },
+    /*
+        Get the Member.CurrentHighs for an Attendee
+    */
+    attendeeCurrentHighs: function (attendee) {
+      // input good?
+      if (!attendee || !attendee.Email) {
+        return []
+      }
+      // match the Member from the attendee.Email
+      const Member = this.getMemberByEmail(attendee.Email)
+      // return empty set if Member not found
+      if (!Member) {
+        return []
+      }
+      // are there any CurrentHighs for Member?
+      if (!Member.CurrentHighs || Member.CurrentHighs.length === 0) {
+        return []
+      }
+      return Member.CurrentHighs
+    },
+    /*
+        Set the Member.CurrentHighs to attendeeMeetingHighs
+    */
+    setCurrentHighs: function (attendee) {
+      const GroupID = this.$route.params.groupid
+      // match the Member from the attendee.Email
+      const Member = this.getMemberByEmail(attendee.Email)
+      const MemberID = Member.id
+      // get the meeting highs for the attendee
+      const Highs = this.attendeeMeetingHighs(attendee)
+
+      this.$store.dispatch('bagMembers/SetCurrentHighs', {
+        GroupID,
+        MemberID,
+        Highs,
+      })
+    },
+
     /*
         ===== GOALS =====
     */
@@ -517,19 +642,23 @@ export default {
       return Member.CurrentGoals
     },
     /*
-        Merge the attendees Member.CurrentGoals into Meeting.Goals
+        Set the Member.CurrentGoals to attendeeMeetingGoals
     */
-    addMeetingGoals(attendee) {
-      let GroupID = this.$route.params.groupid
-      let MeetingID = this.$route.params.id
-      // get the Group.Member.CurrentGoals for the attendee
-      let Goals = this.attendeeCurrentGoals(attendee)
-      this.$store.dispatch('bagMeetings/AddGoals', {
+    setCurrentGoals: function (attendee) {
+      const GroupID = this.$route.params.groupid
+      // match the Member from the attendee.Email
+      const Member = this.getMemberByEmail(attendee.Email)
+      const MemberID = Member.id
+      // get the meeting goals for the attendee
+      const Goals = this.attendeeMeetingGoals(attendee)
+
+      this.$store.dispatch('bagMembers/SetCurrentGoals', {
         GroupID,
-        MeetingID,
+        MemberID,
         Goals,
       })
     },
+
     /*
         ===== SIDEBARS =====
     */
@@ -576,59 +705,21 @@ export default {
       return Member.CurrentSidebars
     },
     /*
-        Merge the attendees Member.CurrentSidebars into Meeting.Sidebars
+        Set the Member.CurrentSidebars to attendeeMeetingSidebars
     */
-    addMeetingSidebars: function (attendee) {
-      let GroupID = this.$route.params.groupid
-      let MeetingID = this.$route.params.id
-      // get the Group.Member.CurrentSidebars for the attendee
-      let Sidebars = this.attendeeCurrentSidebars(attendee)
-      this.$store.dispatch('bagMeetings/AddSidebars', {
+    setCurrentSidebars: function (attendee) {
+      const GroupID = this.$route.params.groupid
+      // match the Member from the attendee.Email
+      const Member = this.getMemberByEmail(attendee.Email)
+      const MemberID = Member.id
+      // get the meeting goals for the attendee
+      const Sidebars = this.attendeeMeetingSidebars(attendee)
+
+      this.$store.dispatch('bagMembers/SetCurrentSidebars', {
         GroupID,
-        MeetingID,
+        MemberID,
         Sidebars,
       })
-    },
-
-    /*
-        takes an email address and returns the corresponding bagGroups.Member
-    */
-    getMemberByEmail: function (email) {
-      if (!email) {
-        return {}
-      }
-      // get the Member from Members
-      let Members = this.Members
-      // did we find some members?
-      if (!Members) {
-        console.log('No group members')
-        return {}
-      }
-      let Member = this.Members.find((element) => element.Email === email)
-      // did we find the Member match?
-      if (!Member) {
-        return {}
-      }
-      return Member
-    },
-    IsReadyToStart: function () {
-      if (!this.Meeting) {
-        return false
-      }
-      // valid facilitator?
-      if (!this.validFacilitator) {
-        return false
-      }
-      if (!this.validAttendees) {
-        return false
-      }
-      if (!this.validGoals) {
-        return false
-      }
-      if (!this.validSidebars) {
-        return false
-      }
-      return true
     },
   },
   async mounted() {
@@ -643,10 +734,6 @@ export default {
     })
     // load the Members for this Group
     this.$store.dispatch('bagMembers/listenMembers', GroupID)
-    // load the Goals for this Group
-    this.$store.dispatch('bagGoals/listenGoals', GroupID)
-    // load the Sidebars for this Group
-    this.$store.dispatch('bagSidebars/listenSidebars', GroupID)
   },
   async fetch() {},
 }

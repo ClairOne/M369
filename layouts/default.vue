@@ -33,7 +33,7 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <v-app-bar :clipped-left="clipped" fixed app>
+    <v-app-bar color="black" :clipped-left="clipped" fixed app dense dark>
       <v-app-bar-nav-icon
         v-if="CurrentUser"
         @click.stop="drawer = !drawer"
@@ -42,10 +42,10 @@
       <v-spacer />
       <v-toolbar-title v-text="title" />
       <v-spacer />
-      <USERMENU></USERMENU>
+      <USERMENU />
     </v-app-bar>
     <v-main>
-      <v-container>
+      <v-container fluid>
         <Nuxt />
       </v-container>
     </v-main>

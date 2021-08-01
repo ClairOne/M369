@@ -257,7 +257,9 @@ export default {
   methods: {
     viewMeeting: function (meetingID) {
       // redirect the UI to the meeting
-      this.$router.push('/bag/meet/' + this.$route.params.id + '/' + meetingID)
+      this.$router.push(
+        '/bag/meeting/' + this.$route.params.id + '/' + meetingID
+      )
     },
     startMeeting: function (meetingID) {
       // redirect to the start meeting wizard

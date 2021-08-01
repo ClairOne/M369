@@ -57,6 +57,7 @@ const actions = {
             console.log('If you do not pass a Meeting, we can not create it!')
             return
         }
+        // @TODO: build a standard Meeting data model here
         // insert a new meeting into the bagGroup subcollection
         this.$fire.firestore.collection('bagGroups').doc(GroupID)
             .collection('Meetings').add(Meeting).then((docRef) => {
@@ -221,14 +222,328 @@ const actions = {
         });
     },
     /*
+        Add a Goal to the Meeting.Goals array
+    */
+    async AddGoal({ context }, { GroupID, MeetingID, Goal }) {
+        if (!GroupID || !MeetingID || !Goal) { return }
+        // set the CreatedAt
+        const tmpDate = new Date()
+        const tmpCreatedAt = `${tmpDate.getFullYear()}-${tmpDate.getMonth() + 1
+            }-${tmpDate.getDate()} ${tmpDate.getHours()}:${(
+                '0' + tmpDate.getMinutes()
+            ).slice(-2)}`
+
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                // Build the Goal @TODO: create a generic function for this to ensure map standardization
+                const newGoal = {
+                    Member: Goal.Member, //@TODO: this is where it would be nice to call that function I mentioned above
+                    Title: Goal.Title,
+                    Status: Goal.Status,
+                    CreatedAt: tmpCreatedAt,
+                    Source: Goal.Source,
+                    SourceType: Goal.SourceType
+                }
+                // do we have an existing values that shouldn't be overwritten?
+                if (Goal.CreatedAt) { newGoal.CreatedAt = Goal.CreatedAt }
+                if (Goal.Status) { newGoal.Status = Goal.Status }
+                if (Goal.Source) { newGoal.Source = Goal.Source }
+                if (Goal.SourceType) { newGoal.SourceType = Goal.SourceType }
+
+                const Meeting = docRef.data()
+                // Does Meeting.Goals exist?
+                if (Meeting.Goals) {
+                    // here's where we insert the newGoal
+                    Meeting.Goals.push(newGoal)
+                } else {
+                    Meeting.Goals = [newGoal]
+                }
+                // update FS document (Firestore & Vuex handles the rest with the listeners)
+                meetingRef.update({
+                    Goals: Meeting.Goals
+                })
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+    /*
+        Remove a Goal from the Meeting.Goals array
+    */
+    async RemoveGoal({ context }, { GroupID, MeetingID, Goal }) {
+        if (!GroupID || !MeetingID || !Goal) { return }
+        // is it a valid Goal.Member object?
+        if (!Goal.Member || !Goal.Member.Email) { return }
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                const Meeting = docRef.data()
+                // let's build a new list of Goals without the one to be removed
+                let tmpGoals = Meeting.Goals
+                tmpGoals = tmpGoals.filter((item) => {
+                    return (item.Member.Email != Goal.Member.Email || item.Title != Goal.Title)
+                })
+                // here's where we actually remove the Goal
+                meetingRef.update({
+                    Goals: tmpGoals
+                })
+                // Vuex/Firestore takes care of the rest
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+    /*
+        Add a Goal to the Meeting.Goals array
+    */
+    async AddGoals({ context }, { GroupID, MeetingID, Goals }) {
+        if (!GroupID || !MeetingID || !Goals) { return }
+        // set the CreatedAt
+        const tmpDate = new Date()
+        const tmpCreatedAt = `${tmpDate.getFullYear()}-${tmpDate.getMonth() + 1
+            }-${tmpDate.getDate()} ${tmpDate.getHours()}:${(
+                '0' + tmpDate.getMinutes()
+            ).slice(-2)}`
+
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                const Meeting = docRef.data()
+                // We have 2 potential arrays: existing and new goals
+                let newGoals = []
+                let existingGoals = Meeting.Goals ? Meeting.Goals : []
+
+                // process each goal and push them into newGoals
+                Goals.forEach((Goal) => {
+                    // Build the Goal @TODO: create a generic function for this to ensure map standardization
+                    const newGoal = {
+                        Member: Goal.Member, //@TODO: this is where it would be nice to call that function I mentioned above
+                        Title: Goal.Title,
+                        Status: Goal.Status,
+                        CreatedAt: tmpCreatedAt,
+                        Source: Goal.Source,
+                        SourceType: Goal.SourceType
+                    }
+                    // do we have an existing values that shouldn't be overwritten?
+                    if (Goal.CreatedAt) { newGoal.CreatedAt = Goal.CreatedAt }
+                    if (Goal.Status) { newGoal.Status = Goal.Status }
+                    if (Goal.Source) { newGoal.Source = Goal.Source }
+                    if (Goal.SourceType) { newGoal.SourceType = Goal.SourceType }
+
+                    // push it to the newGoals array
+                    newGoals.push(newGoal)
+                })
+                // let's merge the 2 together
+                let updateGoals = newGoals
+
+                // merge into the updateGoals the existing ones that aren't in this new batch
+                existingGoals.forEach((existingGoal) => {
+                    // find it in the updateGoals
+                    let tmpGoal = updateGoals.find((item) => {
+                        return (
+                            item.Member.Email === existingGoal.Member.Email &&
+                            item.Title === existingGoal.Title
+                        )
+                    })
+                    if (!tmpGoal) {
+                        // push it to the list
+                        updateGoals.push(existingGoal)
+                    }
+                })
+                /*
+                    at this point we should have a clean set of updateGoals
+                    with the newGoals and the existingGoals merged without duplicates
+                */
+
+                // update FS document (Firestore & Vuex handles the rest with the listeners)
+                meetingRef.update({
+                    Goals: updateGoals
+                })
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+    /*
+        Add a Sidebar to the Meeting.Sidebars array
+    */
+    async AddSidebar({ context }, { GroupID, MeetingID, Sidebar }) {
+        if (!GroupID || !MeetingID || !Sidebar) { return }
+        // set the 
+        const tmpDate = new Date()
+        const tmpCreatedAt = `${tmpDate.getFullYear()}-${tmpDate.getMonth() + 1
+            }-${tmpDate.getDate()} ${tmpDate.getHours()}:${(
+                '0' + tmpDate.getMinutes()
+            ).slice(-2)}`
+
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                // Build the Sidebar @TODO: create a generic function for this to ensure map standardization
+                const newSidebar = {
+                    Reason: Sidebar.Reason,
+                    RequestedBy: Sidebar.RequestedBy, //@TODO: this is where it would be nice to call that function I mentioned above
+                    RequestedOf: Sidebar.RequestedOf,
+                    Status: Sidebar.Status,
+                    CreatedAt: tmpCreatedAt,
+                    Source: Sidebar.Source,
+                    SourceType: Sidebar.SourceType
+                }
+                const Meeting = docRef.data()
+                // Does Meeting.Sidebars exist?
+                if (Meeting.Sidebars) {
+                    // here's where we insert the newSidebar
+                    Meeting.Sidebars.push(newSidebar)
+                } else {
+                    Meeting.Sidebars = [newSidebar]
+                }
+                // update FS document (Firestore & Vuex handles the rest with the listeners)
+                meetingRef.update({
+                    Sidebars: Meeting.Sidebars
+                })
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+    /*
+        Remove a Sidebar from the Meeting.Sidebars array
+    */
+    async RemoveSidebar({ context }, { GroupID, MeetingID, Sidebar }) {
+        if (!GroupID || !MeetingID || !Sidebar) { return }
+        // is it a valid Sidebar.RequestedBy object?
+        if (!Sidebar.RequestedBy || !Sidebar.RequestedBy.Email) { return }
+        // is it a valid Sidebar.RequestedOf object?
+        if (!Sidebar.RequestedOf || !Sidebar.RequestedOf.Email) { return }
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                const Meeting = docRef.data()
+                // let's build a new list of Sidebars without the one to be removed
+                let tmpSidebars = Meeting.Sidebars
+                tmpSidebars = tmpSidebars.filter((item) => {
+                    return (
+                        item.RequestedBy.Email != Sidebar.RequestedBy.Email ||
+                        item.RequestedOf.Email != Sidebar.RequestedOf.Email ||
+                        item.Reason != Sidebar.Reason)
+                })
+                // here's where we actually remove the Sidebar
+                meetingRef.update({
+                    Sidebars: tmpSidebars
+                })
+                // Vuex/Firestore takes care of the rest
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+    /*
+        Add Sidebar(s) to the Meeting.Sidebars array
+    */
+    async AddSidebars({ context }, { GroupID, MeetingID, Sidebars }) {
+        if (!GroupID || !MeetingID || !Sidebars) { return }
+        // set the CreatedAt
+        const tmpDate = new Date()
+        const tmpCreatedAt = `${tmpDate.getFullYear()}-${tmpDate.getMonth() + 1
+            }-${tmpDate.getDate()} ${tmpDate.getHours()}:${(
+                '0' + tmpDate.getMinutes()
+            ).slice(-2)}`
+
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                const Meeting = docRef.data()
+                // We have 2 potential arrays: existing and new
+                let newSidebars = []
+                let existingSidebars = Meeting.Sidebars ? Meeting.Sidebars : []
+
+                // process each and push them into new
+                Sidebars.forEach((Sidebar) => {
+                    // Build the Object @TODO: create a generic function for this to ensure map standardization
+                    const newSidebar = {
+                        RequestedBy: Sidebar.RequestedBy, //@TODO: this is where it would be nice to call that function I mentioned above
+                        RequestedOf: Sidebar.RequestedOf,
+                        Reason: Sidebar.Reason,
+                        CreatedAt: tmpCreatedAt,
+                        Source: Sidebar.Source,
+                        SourceType: Sidebar.SourceType
+                    }
+                    // do we have an existing values that shouldn't be overwritten?
+                    if (Sidebar.CreatedAt) { newSidebar.CreatedAt = Sidebar.CreatedAt }
+                    if (Sidebar.Source) { newSidebar.Source = Sidebar.Source }
+                    if (Sidebar.SourceType) { newSidebar.SourceType = Sidebar.SourceType }
+
+                    // push it to the new array
+                    newSidebars.push(newSidebar)
+                })
+                // let's merge the 2 together
+                let updateSidebars = newSidebars
+
+                // merge into the update the existing ones that aren't in this new batch
+                existingSidebars.forEach((existingSidebar) => {
+                    // find it in the updateSidebars
+                    let tmpSidebar = updateSidebars.find((item) => {
+                        return (
+                            item.RequestedBy.Email != existingSidebar.RequestedBy.Email ||
+                            item.RequestedOf.Email != existingSidebar.RequestedOf.Email ||
+                            item.Reason != existingSidebar.Reason
+                        )
+                    })
+                    if (!tmpSidebar) {
+                        // push it to the list
+                        updateSidebars.push(existingSidebar)
+                    }
+                })
+                /*
+                    at this point we should have a clean set of updateSidebars
+                    with the newSidebars and the existingSidebars merged without duplicates
+                */
+
+                // update FS document (Firestore & Vuex handles the rest with the listeners)
+                meetingRef.update({
+                    Sidebars: updateSidebars
+                })
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+    /*
         Sets the StartedAt timestamp
     */
     async Start({ context }, { GroupID, MeetingID }) {
         if (!GroupID || !MeetingID) { return }
         // create the timestamp (we don't want to use the format used by FS)
-        const current = new Date()
-        const tmpStartedAt = `${current.getFullYear()}-${current.getMonth() + 1
-            }-${current.getDate()} ${current.getHours()}:${current.getMinutes()}`
+        const tmpDate = new Date()
+        const tmpStartedAt = `${tmpDate.getFullYear()}-${tmpDate.getMonth() + 1
+            }-${tmpDate.getDate()} ${tmpDate.getHours()}:${(
+                '0' + tmpDate.getMinutes()
+            ).slice(-2)}`
 
         // fetch the document
         const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
@@ -238,6 +553,35 @@ const actions = {
                 // here's where we actually update the Meeting
                 meetingRef.update({
                     StartedAt: tmpStartedAt
+                })
+                // Vuex/Firestore takes care of the rest
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+    /*
+        Sets the ClosedAt timestamp
+    */
+    async Close({ context }, { GroupID, MeetingID }) {
+        if (!GroupID || !MeetingID) { return }
+        // create the timestamp (we don't want to use the format used by FS)
+        const tmpDate = new Date()
+        const tmpClosedAt = `${tmpDate.getFullYear()}-${tmpDate.getMonth() + 1
+            }-${tmpDate.getDate()} ${tmpDate.getHours()}:${(
+                '0' + tmpDate.getMinutes()
+            ).slice(-2)}`
+
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                // here's where we actually update the Meeting
+                meetingRef.update({
+                    ClosedAt: tmpClosedAt
                 })
                 // Vuex/Firestore takes care of the rest
             } else {
