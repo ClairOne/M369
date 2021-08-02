@@ -506,9 +506,9 @@ const actions = {
                     // find it in the updateSidebars
                     let tmpSidebar = updateSidebars.find((item) => {
                         return (
-                            item.RequestedBy.Email != existingSidebar.RequestedBy.Email ||
-                            item.RequestedOf.Email != existingSidebar.RequestedOf.Email ||
-                            item.Reason != existingSidebar.Reason
+                            item.RequestedBy.Email === existingSidebar.RequestedBy.Email &&
+                            item.RequestedOf.Email === existingSidebar.RequestedOf.Email &&
+                            item.Reason === existingSidebar.Reason
                         )
                     })
                     if (!tmpSidebar) {

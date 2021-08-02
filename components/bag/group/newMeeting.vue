@@ -110,31 +110,6 @@
                   </v-dialog>
                 </v-col>
                 <v-spacer />
-                <v-col cols="12" sm="5">
-                  <v-select
-                    v-model="Facilitator"
-                    :items="Group.Facilitators"
-                    item-text="DisplayName"
-                    item-value="id"
-                    return-object
-                    :rules="rulesFacilitator"
-                    label="Facilitator"
-                    outlined
-                  ></v-select>
-                  <v-select
-                    v-model="Attendees"
-                    :items="Group.Members"
-                    item-text="DisplayName"
-                    item-value="id"
-                    return-object
-                    :rules="rulesAttendees"
-                    chips
-                    label="Attendees"
-                    multiple
-                    outlined
-                  ></v-select>
-                </v-col>
-                <v-spacer />
               </v-row>
             </v-card-text>
             <v-card-actions>
@@ -165,19 +140,13 @@ export default {
       modalTimePicker: false,
       MeetingDate: '',
       MeetingTime: '',
-      Facilitator: {},
-      Attendees: [],
       rulesMeetingDate: [(v) => !!v || 'Choose a date for the meeting.'],
       rulesMeetingTime: [(v) => !!v || 'Choose a time for the meeting.'],
-      rulesFacilitator: [
-        (v) => (v && !!v.DisplayName) || 'Select a Facilitator',
-      ],
-      rulesAttendees: [(v) => v.length > 0 || 'Select at least 1 Attendee'],
     }
   },
   props: ['Group', 'btnColor', 'btnTextColor', 'btnSize'],
   computed: {
-    ...mapGetters(['CurrentUser']),
+    ...mapState({}),
     MeetingDateTime() {
       // at some point we'll need to accommodate for time zone stuff
       // so I'm throwing this in here to stub in where that might go
@@ -194,8 +163,11 @@ export default {
       tmpM.MeetingDate = this.MeetingDate
       tmpM.MeetingTime = this.MeetingTime
       tmpM.MeetingDateTime = this.MeetingDateTime
-      tmpM.Facilitator = this.Facilitator
-      tmpM.Attendees = this.Attendees
+      tmpM.Facilitator = {}
+      tmpM.Attendees = []
+      tmpM.Highs = []
+      tmpM.Goals = []
+      tmpM.Sidebars = []
       return tmpM
     },
   },

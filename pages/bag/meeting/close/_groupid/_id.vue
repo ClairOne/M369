@@ -7,7 +7,7 @@
             @click="bottomSheet = !bottomSheet"
           ></v-app-bar-nav-icon>
           <v-spacer />
-          <v-toolbar-title> Meeting </v-toolbar-title>
+          <v-toolbar-title> Meeting: Closing </v-toolbar-title>
           <v-spacer></v-spacer>
         </v-toolbar>
       </v-row>
@@ -443,10 +443,20 @@
               </v-col>
 
               <v-col cols="12" md="3">
-                <v-btn color="warning" @click="runMeeting()" dense>
+                <v-btn
+                  color="warning"
+                  @click="runMeeting()"
+                  dense
+                  :disabled="!IsRunning"
+                >
                   Run Meeting
                 </v-btn>
-                <v-btn color="success" @click="closeMeeting()" dense>
+                <v-btn
+                  :disabled="!IsRunning"
+                  color="success"
+                  @click="closeMeeting()"
+                  dense
+                >
                   End Meeting
                 </v-btn>
               </v-col>
@@ -475,23 +485,28 @@ export default {
       Meeting: (state) => state.bagMeetings.Meeting,
       Members: (state) => state.bagMembers.Members,
     }),
-    IsClosed() {
-      // we use this to redirect based on the underlying conditions of Meeting.StartedAt and Meeting.EndedAt
-      // if the meeting hasn't loaded yet, just ignore this
-      if (!this.Meeting) {
+    IsRunning() {
+      // has it loaded? (We check for the Meeting.id because sometimes we have a Meeting, but only a partial one)
+      if (!this.Meeting || !this.Meeting.id) {
         return false
       }
+
+      // is it running? (StartedAt with no ClosedAt)
+      if (this.Meeting.StartedAt && !this.Meeting.ClosedAt) {
+        return true
+      }
+      // it's not running so we should redirect based on what state it IS in
       const GroupID = this.$route.params.groupid
       const MeetingID = this.$route.params.id
-      // if the meeting HAS loaded and StartedAt has not been set, return to start
-      if (this.Meeting && !this.Meeting.StartedAt) {
-        this.$router.push('/bag/meeting/start/' + GroupID + '/' + MeetingID)
-      }
-      // if the meeting has ENDED then redirect to the report
-      if (this.Meeting && this.Meeting.ClosedAt) {
+      // is it closed?
+      if (this.Meeting.ClosedAt) {
         this.$router.push('/bag/meeting/report/' + GroupID + '/' + MeetingID)
       }
-      return true
+
+      // is it not started?
+      if (!this.Meeting.StartedAt) {
+        this.$router.push('/bag/meeting/start/' + GroupID + '/' + MeetingID)
+      }
     },
   },
   methods: {
