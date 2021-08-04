@@ -518,7 +518,7 @@ export default {
       const GroupID = this.$route.params.groupid
       const MeetingID = this.$route.params.id
       // redirect
-      this.$router.push('/bag/meeting/' + GroupID + '/' + MeetingID)
+      this.$router.push('/bag/meeting/run/' + GroupID + '/' + MeetingID)
     },
     closeMeeting: function () {
       const GroupID = this.$route.params.groupid

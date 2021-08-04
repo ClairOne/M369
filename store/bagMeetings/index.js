@@ -58,6 +58,19 @@ const actions = {
             return
         }
         // @TODO: build a standard Meeting data model here
+        const newMeeting = {
+            MeetingDate: Meeting.MeetingDate,
+            MeetingTime: Meeting.MeetingTime,
+            MeetingDatTime: Meeting.MeetingDateTime,
+            Attendees: Meeting.Attendees,
+            Facilitator: Meeting.Facilitator, // @TODO: send this off to the Facilitator formatter
+            PreviousHighs: [],
+            Highs: Meeting.Highs,
+            PreviousGoals: [],
+            Goals: Meeting.Goals,
+            PreviousSidebars: [],
+            Sidbars: Meeting.Sidebars,
+        }
         // insert a new meeting into the bagGroup subcollection
         this.$fire.firestore.collection('bagGroups').doc(GroupID)
             .collection('Meetings').add(Meeting).then((docRef) => {
@@ -303,9 +316,9 @@ const actions = {
         });
     },
     /*
-        Add a Goal to the Meeting.Goals array
+        Add Goals to the Meeting.PreviousGoals array
     */
-    async AddGoals({ context }, { GroupID, MeetingID, Goals }) {
+    async addPreviousGoals({ context }, { GroupID, MeetingID, Goals }) {
         if (!GroupID || !MeetingID || !Goals) { return }
         // set the CreatedAt
         const tmpDate = new Date()
@@ -321,7 +334,7 @@ const actions = {
                 const Meeting = docRef.data()
                 // We have 2 potential arrays: existing and new goals
                 let newGoals = []
-                let existingGoals = Meeting.Goals ? Meeting.Goals : []
+                let existingGoals = Meeting.PreviousGoals ? Meeting.PreviousGoals : []
 
                 // process each goal and push them into newGoals
                 Goals.forEach((Goal) => {
@@ -343,10 +356,12 @@ const actions = {
                     // push it to the newGoals array
                     newGoals.push(newGoal)
                 })
+
                 // let's merge the 2 together
+                // add newGoals to updateGoals
                 let updateGoals = newGoals
 
-                // merge into the updateGoals the existing ones that aren't in this new batch
+                // push into the updateGoals the existing ones that aren't in this new batch
                 existingGoals.forEach((existingGoal) => {
                     // find it in the updateGoals
                     let tmpGoal = updateGoals.find((item) => {
@@ -367,8 +382,56 @@ const actions = {
 
                 // update FS document (Firestore & Vuex handles the rest with the listeners)
                 meetingRef.update({
-                    Goals: updateGoals
+                    PreviousGoals: updateGoals
                 })
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+    /*
+        Update the status of a PreviousGoal in Meeting.PreviousGoals
+    */
+    async SetPreviousGoalStatus({ context }, { GroupID, MeetingID, Goal, Status }) {
+        if (!GroupID || !MeetingID || !Goal || !Status) { return }
+
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                const Meeting = docRef.data()
+                const tmpPreviousGoals = Meeting.PreviousGoals
+
+
+                // fetch the index of the item to be updated
+                let tmpPreviousGoalIndex = tmpPreviousGoals.findIndex((item) => {
+                    return (item.Member.Email === Goal.Member.Email && item.Title === Goal.Title)
+                })
+
+                // if we don't find it, stop processing
+                if (tmpPreviousGoalIndex === -1) {
+                    console.log('Action.SetPreviousGoalStatus: Invalid Previous Goal:' + tmpPreviousGoalIndex)
+                    return
+                }
+
+                // buid a newGoal to avoid the vuex mutation issue
+                let newGoal = {}
+                for (const [key, value] of Object.entries(Goal)) {
+                    newGoal[key] = value
+                }
+                // set the new status
+                newGoal.Status = Status
+
+                // splice in the new updated Goal
+                tmpPreviousGoals.splice(tmpPreviousGoalIndex, 1, newGoal)
+                // update the FS document
+                meetingRef.update({
+                    PreviousGoals: tmpPreviousGoals
+                })
+                // Vuex/Firestore takes care of the rest
             } else {
                 // docRef.data() will be undefined in this case
                 console.log("Invalid Meeting!");
@@ -459,9 +522,9 @@ const actions = {
         });
     },
     /*
-        Add Sidebar(s) to the Meeting.Sidebars array
+        Set Sidebar(s) to the Meeting.PreviousSidebars array
     */
-    async AddSidebars({ context }, { GroupID, MeetingID, Sidebars }) {
+    async AddPreviousSidebars({ context }, { GroupID, MeetingID, Sidebars }) {
         if (!GroupID || !MeetingID || !Sidebars) { return }
         // set the CreatedAt
         const tmpDate = new Date()
@@ -523,7 +586,7 @@ const actions = {
 
                 // update FS document (Firestore & Vuex handles the rest with the listeners)
                 meetingRef.update({
-                    Sidebars: updateSidebars
+                    PreviousSidebars: updateSidebars
                 })
             } else {
                 // docRef.data() will be undefined in this case
@@ -533,6 +596,59 @@ const actions = {
             console.log("Error getting document:", error);
         });
     },
+    /*
+        Update the status of a PreviousSidebar in Meeting.PreviousSidebars
+    */
+    async SetPreviousSidebarStatus({ commit }, { GroupID, MeetingID, Sidebar, Status }) {
+        if (!GroupID || !MeetingID || !Sidebar || !Status) { return }
+
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                const Meeting = docRef.data()
+                const tmpPreviousSidebars = Meeting.PreviousSidebars
+
+
+                // fetch the index of the item to be updated
+                let tmpPreviousSidebarIndex = tmpPreviousSidebars.findIndex((item) => {
+                    return (
+                        item.RequestedBy.Email === Sidebar.RequestedBy.Email &&
+                        item.RequestedOf.Email === Sidebar.RequestedOf.Email &&
+                        item.Title === Sidebar.Title
+                    )
+                })
+
+                // if we don't find it, stop processing
+                if (tmpPreviousSidebarIndex === -1) {
+                    console.log('Action.SetPreviousSidebarStatus: Invalid Previous Sidebar:' + tmpPreviousSidebarIndex)
+                    return
+                }
+
+                // buid a newSidebar to avoid the vuex mutation issue
+                let newSidebar = {}
+                for (const [key, value] of Object.entries(Sidebar)) {
+                    newSidebar[key] = value
+                }
+                // set the new status
+                newSidebar.Status = Status
+
+                // splice in the new updated Sidebar
+                tmpPreviousSidebars.splice(tmpPreviousSidebarIndex, 1, newSidebar)
+                // update the FS document
+                meetingRef.update({
+                    PreviousSidebars: tmpPreviousSidebars
+                })
+                // Vuex/Firestore takes care of the rest
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+
     /*
         Sets the StartedAt timestamp
     */

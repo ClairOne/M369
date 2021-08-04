@@ -111,7 +111,7 @@
                               <v-spacer />
                               <v-btn
                                 color="success"
-                                @click="addMeetingGoals(attendee)"
+                                @click="setPreviousGoals(attendee)"
                               >
                                 Add to Meeting</v-btn
                               >
@@ -128,9 +128,9 @@
                                 </thead>
                                 <tbody>
                                   <tr
-                                    v-for="(
-                                      goal, index
-                                    ) in attendeeCurrentGoals(attendee)"
+                                    v-for="(goal, index) in memberCurrentGoals(
+                                      attendee
+                                    )"
                                     :key="index"
                                   >
                                     <td class="text-left">
@@ -150,7 +150,7 @@
                       <v-col cols="12" md="6">
                         <v-container>
                           <v-card rounded dense>
-                            <v-card-title>Meeting Goals </v-card-title>
+                            <v-card-title>Meeting Previous Goals </v-card-title>
                             <v-card-text>
                               <v-simple-table>
                                 <thead>
@@ -165,7 +165,7 @@
                                   <tr
                                     v-for="(
                                       goal, index
-                                    ) in attendeeMeetingGoals(attendee)"
+                                    ) in attendeePreviousGoals(attendee)"
                                     :key="index"
                                   >
                                     <td class="text-left">
@@ -210,7 +210,7 @@
                               <v-spacer />
                               <v-btn
                                 color="success"
-                                @click="addMeetingSidebars(attendee)"
+                                @click="setPreviousSidebars(attendee)"
                                 >Add to Meeting</v-btn
                               >
                             </v-card-title>
@@ -279,7 +279,7 @@
                                   <tr
                                     v-for="(
                                       sidebar, index
-                                    ) in attendeeMeetingSidebars(attendee)"
+                                    ) in attendeePreviousSidebars(attendee)"
                                     :key="index"
                                   >
                                     <td class="text-left">
@@ -434,7 +434,7 @@ export default {
       // has it been started?
       if (this.Meeting.StartedAt) {
         console.log('IsStarted: Meeting has been started')
-        this.$router.push('/bag/meeting/' + GroupID + '/' + MeetingID)
+        this.$router.push('/bag/meeting/run/' + GroupID + '/' + MeetingID)
       }
       // It's loaded, not closed, and not started, so...
       return false
@@ -480,16 +480,19 @@ export default {
     /*
         Filter the Meeting.Goals for a specific Attendee
     */
-    attendeeMeetingGoals: function (attendee) {
+    attendeePreviousGoals: function (attendee) {
       if (!attendee || !attendee.Email) {
         return []
       }
       // are there any Goals in the Meeting, yet?
-      if (!this.Meeting.Goals || this.Meeting.Goals.length === 0) {
+      if (
+        !this.Meeting.PreviousGoals ||
+        this.Meeting.PreviousGoals.length === 0
+      ) {
         return []
       }
       // use this.Meeting.Goals which is the full list
-      let tmpGoals = this.Meeting.Goals
+      let tmpGoals = this.Meeting.PreviousGoals
 
       tmpGoals = tmpGoals.filter((item) => {
         return item.Member.Email == attendee.Email
@@ -499,7 +502,7 @@ export default {
     /*
         Get the Member.CurrentGoals for an Attendee
     */
-    attendeeCurrentGoals: function (attendee) {
+    memberCurrentGoals: function (attendee) {
       // input good?
       if (!attendee || !attendee.Email) {
         return []
@@ -517,14 +520,14 @@ export default {
       return Member.CurrentGoals
     },
     /*
-        Merge the attendees Member.CurrentGoals into Meeting.Goals
+        Merge the attendees Member.CurrentGoals into Meeting.PreviousGoals
     */
-    addMeetingGoals(attendee) {
+    setPreviousGoals(attendee) {
       let GroupID = this.$route.params.groupid
       let MeetingID = this.$route.params.id
       // get the Group.Member.CurrentGoals for the attendee
-      let Goals = this.attendeeCurrentGoals(attendee)
-      this.$store.dispatch('bagMeetings/AddGoals', {
+      let Goals = this.memberCurrentGoals(attendee)
+      this.$store.dispatch('bagMeetings/addPreviousGoals', {
         GroupID,
         MeetingID,
         Goals,
@@ -536,16 +539,19 @@ export default {
     /*
         Filter the Meeting.Sidebars for a specific Attendee
     */
-    attendeeMeetingSidebars: function (attendee) {
+    attendeePreviousSidebars: function (attendee) {
       if (!attendee || !attendee.Email) {
         return []
       }
       // are there any Sidebars in the Meeting, yet?
-      if (!this.Meeting.Sidebars || this.Meeting.Sidebars.length === 0) {
+      if (
+        !this.Meeting.PreviousSidebars ||
+        this.Meeting.PreviousSidebars.length === 0
+      ) {
         return []
       }
       // use this.Meeting.Sidebars which is the full list
-      let tmpSidebars = this.Meeting.Sidebars
+      let tmpSidebars = this.Meeting.PreviousSidebars
 
       tmpSidebars = tmpSidebars.filter((item) => {
         return (
@@ -576,14 +582,15 @@ export default {
       return Member.CurrentSidebars
     },
     /*
-        Merge the attendees Member.CurrentSidebars into Meeting.Sidebars
+        Merge the attendees Member.CurrentSidebars into Meeting.PreviousSidebars
     */
-    addMeetingSidebars: function (attendee) {
+    setPreviousSidebars: function (attendee) {
       let GroupID = this.$route.params.groupid
       let MeetingID = this.$route.params.id
       // get the Group.Member.CurrentSidebars for the attendee
       let Sidebars = this.attendeeCurrentSidebars(attendee)
-      this.$store.dispatch('bagMeetings/AddSidebars', {
+      // update the meeting
+      this.$store.dispatch('bagMeetings/SetPreviousSidebars', {
         GroupID,
         MeetingID,
         Sidebars,
