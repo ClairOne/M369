@@ -9,7 +9,7 @@
           Welcome to M369!
         </v-card-title>
         <v-card-text class="text-center">
-          <p>Defining, Growing, and Scaling just got easier.</p>
+          <p>Starting, Growing, and Scaling just got easier.</p>
         </v-card-text>
       </v-card>
     </v-col>
