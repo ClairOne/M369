@@ -33,7 +33,15 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <v-app-bar color="black" :clipped-left="clipped" fixed app dense dark>
+    <v-app-bar
+      class="no-print"
+      color="black"
+      :clipped-left="clipped"
+      fixed
+      app
+      dense
+      dark
+    >
       <v-app-bar-nav-icon
         v-if="CurrentUser"
         @click.stop="drawer = !drawer"
@@ -102,3 +110,11 @@ export default {
   },
 }
 </script>
+<style scoped>
+@media print {
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+}
+</style>

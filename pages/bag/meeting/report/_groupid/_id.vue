@@ -1,51 +1,18 @@
 <template>
   <v-container fluid>
     <v-card>
-      <v-toolbar color="#602034" rounded class="mb-2 white--text">
+      <v-toolbar color="#602034" rounded class="mb-2 white--text" dense>
         <v-spacer />
         <v-toolbar-title>Meeting Notes</v-toolbar-title>
         <v-spacer />
       </v-toolbar>
       <v-card-text>
-        <v-expansion-panels v-if="Debug">
-          <v-expansion-panel>
-            <v-expansion-panel-header> Group </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              {{ Group }}
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-          <v-expansion-panel>
-            <v-expansion-panel-header> Meeting </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              {{ Meeting }}
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-          <v-expansion-panel>
-            <v-expansion-panel-header> Highs </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              {{ Highs }}
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-          <v-expansion-panel>
-            <v-expansion-panel-header> Goals </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              {{ Goals }}
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-          <v-expansion-panel>
-            <v-expansion-panel-header> Sidebars </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              {{ Sidebars }}
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
         <v-row class="pa-3">
-          <v-container>
+          <v-container fluid>
             <v-row class="pa-3">
               <v-col cols="12" md="4">
                 <h3>Group</h3>
-                <p>{{ Group.Title }}</p>
+                <p @click="viewGroup(Group.id)">{{ Group.Title }}</p>
                 <h3>Facilitator</h3>
                 <p v-if="Meeting.Facilitator">
                   {{ Meeting.Facilitator.DisplayName }}
@@ -71,16 +38,16 @@
           :key="attendee.Email"
           class="pa-5 pb"
         >
-          <v-container>
+          <v-container fluid>
             <v-toolbar color="secondary" class="white--text" dense rounded>
               <v-toolbar-title>{{ attendee.DisplayName }}</v-toolbar-title>
             </v-toolbar>
           </v-container>
-          <v-container>
+          <v-container fluid>
             <v-toolbar color="accent" class="white--text" dense rounded>
               <v-toolbar-title>Highs &amp; Lows</v-toolbar-title>
             </v-toolbar>
-            <v-simple-table>
+            <v-simple-table dense>
               <thead>
                 <tr>
                   <th class="text-left" width="20%">Status</th>
@@ -103,11 +70,11 @@
             </v-simple-table>
           </v-container>
 
-          <v-container>
+          <v-container fluid>
             <v-toolbar color="accent" class="white--text" dense rounded>
               <v-toolbar-title>Goals</v-toolbar-title>
             </v-toolbar>
-            <v-simple-table>
+            <v-simple-table dense>
               <thead>
                 <tr>
                   <th class="text-left" width="20%">Status</th>
@@ -127,11 +94,14 @@
             </v-simple-table>
           </v-container>
 
-          <v-container>
+          <v-container fluid>
             <v-toolbar color="accent" class="white--text" dense rounded>
               <v-toolbar-title>Sidebars</v-toolbar-title>
             </v-toolbar>
-            <v-simple-table>
+            <v-simple-table
+              dense
+              v-if="attendeeSidebars(attendee.Email).length > 0"
+            >
               <thead>
                 <tr>
                   <th class="text-left" width="20%">Requested By</th>
@@ -155,6 +125,7 @@
                 </tr>
               </tbody>
             </v-simple-table>
+            <v-container v-else>None</v-container>
           </v-container>
         </v-row>
       </v-card-text>
@@ -191,23 +162,24 @@ export default {
       // is it closed?
       if (this.Meeting.ClosedAt) {
         return 'Closed'
-        //this.$router.push('/bag/meeting/report/' + GroupID + '/' + MeetingID)
       }
 
       // is it started?
       if (this.Meeting.StartedAt) {
         return 'Running'
-        //this.$router.push('/bag/meeting/run/' + GroupID + '/' + MeetingID)
       }
 
       // it isn't running or started so it's scheduled
       if (!this.Meeting.StartedAt && !this.Meeting.ClosedAt) {
         return 'Scheduled'
-        //this.$router.push('/bag/meeting/start/' + GroupID + '/' + MeetingID)
       }
     },
   },
   methods: {
+    viewGroup: function (groupID) {
+      // redirect the UI to the group
+      this.$router.push('/bag/group/' + groupID)
+    },
     attendeeHighs(AttendeeEmail) {
       // should we filter or return them all?
       if (!AttendeeEmail) {

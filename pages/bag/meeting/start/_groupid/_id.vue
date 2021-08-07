@@ -365,7 +365,7 @@ export default {
   data() {
     return {
       bottomSheet: false,
-      selectedTab: 2,
+      selectedTab: 0,
       selectedAttendeeIndex: {},
     }
   },
@@ -590,7 +590,7 @@ export default {
       // get the Group.Member.CurrentSidebars for the attendee
       let Sidebars = this.attendeeCurrentSidebars(attendee)
       // update the meeting
-      this.$store.dispatch('bagMeetings/SetPreviousSidebars', {
+      this.$store.dispatch('bagMeetings/AddPreviousSidebars', {
         GroupID,
         MeetingID,
         Sidebars,

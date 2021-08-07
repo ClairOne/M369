@@ -17,7 +17,7 @@
             </tr>
           </thead>
           <tbody>
-            <template v-for="(facilitator, index) in Group.Facilitators">
+            <template v-for="(facilitator, index) in Facilitators">
               <tr :key="index" @click="assignFacilitator(facilitator)">
                 <td class="text-center">
                   <v-icon
@@ -56,6 +56,7 @@ export default {
     ...mapState({
       Group: (state) => state.bagGroups.Group,
       Meeting: (state) => state.bagMeetings.Meeting,
+      Facilitators: (state) => state.bagFacilitators.Facilitators,
     }),
   },
   methods: {

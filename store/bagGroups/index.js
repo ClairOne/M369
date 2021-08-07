@@ -53,9 +53,10 @@ const actions = {
             Title: Group.Title,
             Description: Group.Description,
             Icon: Group.Icon,
-            Facilitators: Group.Facilitators,
-            Members: Group.Members,
             Owner: Group.Owner,
+            // these are now sub-collections
+            //Facilitators: Group.Facilitators,
+            //Members: Group.Members,
         }
         this.$fire.firestore.collection('bagGroups').add(NewGroup)
             .then((docRef) => {

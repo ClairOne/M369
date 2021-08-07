@@ -17,9 +17,8 @@
       <v-card-text>
         <v-form ref="newMember" v-model="valid">
           <v-card>
-            <v-card-title>Member Info ({{ valid }})</v-card-title>
+            <v-card-title>Member Info</v-card-title>
             <v-card-text>
-              <v-row>{{ Group }}</v-row>
               <v-row>
                 <v-spacer />
                 <v-col cols="12" sm="4">
@@ -169,9 +168,10 @@ export default {
       }
       if (this.Membership === 'Facilitator' || this.Membership === 'Both') {
         // add member to Group.Facilitators
+        const Facilitator = Member
         this.$store.dispatch('bagFacilitators/Add', {
           GroupID,
-          Member,
+          Facilitator,
         })
       }
 

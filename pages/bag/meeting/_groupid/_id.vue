@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <h3>Loading the meeting...</h3>
-    <p>This is the magic redirector based on the meeting Status</p>
+    <p>One moment while we load the meeting details...</p>
     <p>{{ meetingStatus }}</p>
   </v-container>
 </template>
@@ -28,20 +28,17 @@ export default {
       const MeetingID = this.$route.params.id
       // is it closed?
       if (this.Meeting.ClosedAt) {
-        return 'Closed'
-        //this.$router.push('/bag/meeting/report/' + GroupID + '/' + MeetingID)
+        this.$router.push('/bag/meeting/report/' + GroupID + '/' + MeetingID)
       }
 
       // is it started?
       if (this.Meeting.StartedAt) {
-        return 'Running'
-        //this.$router.push('/bag/meeting/run/' + GroupID + '/' + MeetingID)
+        this.$router.push('/bag/meeting/run/' + GroupID + '/' + MeetingID)
       }
 
       // it isn't running or started so it's scheduled
       if (!this.Meeting.StartedAt && !this.Meeting.ClosedAt) {
-        return 'Scheduled'
-        //this.$router.push('/bag/meeting/start/' + GroupID + '/' + MeetingID)
+        this.$router.push('/bag/meeting/start/' + GroupID + '/' + MeetingID)
       }
     },
   },

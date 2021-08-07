@@ -130,7 +130,7 @@
 
                   <tbody>
                     <tr
-                      v-for="facilitator in Group.Facilitators"
+                      v-for="facilitator in Facilitators"
                       :key="facilitator.id"
                     >
                       <td class="text-left">
@@ -252,6 +252,7 @@ export default {
       Group: (state) => state.bagGroups.Group,
       Meetings: (state) => state.bagMeetings.Meetings,
       Members: (state) => state.bagMembers.Members,
+      Facilitators: (state) => state.bagFacilitators.Facilitators,
     }),
   },
   methods: {
@@ -277,6 +278,7 @@ export default {
       this.$store.dispatch('bagGroups/listenGroup', GroupID)
       this.$store.dispatch('bagMeetings/listenMeetings', GroupID)
       this.$store.dispatch('bagMembers/listenMembers', GroupID)
+      this.$store.dispatch('bagFacilitators/listenFacilitators', GroupID)
     }
   },
 }

@@ -8,7 +8,7 @@ const actions = {
             return
         }
         commit('BAG_MEETINGS_SET', [])
-        this.$fire.firestore.collection('bagGroups').doc(GroupID).collection('Meetings').onSnapshot((res) => {
+        this.$fire.firestore.collection('bagGroups').doc(GroupID).collection('Meetings').orderBy("MeetingDateTime", "desc").limit(10).onSnapshot((res) => {
             const changes = res.docChanges()
             changes.forEach((change) => {
                 let meeting = change.doc.data()
@@ -273,6 +273,9 @@ const actions = {
                 } else {
                     Meeting.Goals = [newGoal]
                 }
+                console.log('AddSidebar:Meeting.Goals:')
+                console.log(Meeting.Goals)
+
                 // update FS document (Firestore & Vuex handles the rest with the listeners)
                 meetingRef.update({
                     Goals: Meeting.Goals
@@ -443,9 +446,58 @@ const actions = {
     /*
         Add a Sidebar to the Meeting.Sidebars array
     */
-    async AddSidebar({ context }, { GroupID, MeetingID, Sidebar }) {
+    async AddSidebarx({ context }, { GroupID, MeetingID, Sidebar }) {
+        console.log('AddSidebar(GroupID, MeetingID, Sidebar):' + GroupID + ':' + MeetingID)
+        console.log(Sidebar)
         if (!GroupID || !MeetingID || !Sidebar) { return }
         // set the 
+        const tmpDate = new Date()
+        const tmpCreatedAt = `${tmpDate.getFullYear()}-${tmpDate.getMonth() + 1
+            }-${tmpDate.getDate()} ${tmpDate.getHours()}:${(
+                '0' + tmpDate.getMinutes()
+            ).slice(-2)}`
+
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                // Build the Sidebar @TODO: create a generic function for this to ensure map standardization
+                const newSidebar = {
+                    Reason: Sidebar.Reason,
+                    //                    RequestedBy: Sidebar.RequestedBy, //@TODO: this is where it would be nice to call that function I mentioned above
+                    //                    RequestedOf: Sidebar.RequestedOf,
+                    Status: Sidebar.Status,
+                    CreatedAt: tmpCreatedAt,
+                    Source: Sidebar.Source,
+                    SourceType: Sidebar.SourceType
+                }
+                console.log('newSidebar:')
+                console.log(newSidebar)
+                const Meeting = docRef.data()
+                // Does Meeting.Sidebars exist?
+                if (Meeting.Sidebars) {
+                    // here's where we insert the newSidebar
+                    Meeting.Sidebars.push(newSidebar)
+                } else {
+                    Meeting.Sidebars = [newSidebar]
+                }
+                console.log('Meeting.Sidebars:')
+                console.log(Meeting.Sidebars)
+                // update FS document (Firestore & Vuex handles the rest with the listeners)
+                meetingRef.update({
+                    Sidebars: Meeting.Sidebars
+                })
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+    async AddSidebar({ context }, { GroupID, MeetingID, Sidebar }) {
+        if (!GroupID || !MeetingID || !Sidebar) { return }
+        // set the CreatedAt
         const tmpDate = new Date()
         const tmpCreatedAt = `${tmpDate.getFullYear()}-${tmpDate.getMonth() + 1
             }-${tmpDate.getDate()} ${tmpDate.getHours()}:${(
@@ -466,14 +518,22 @@ const actions = {
                     Source: Sidebar.Source,
                     SourceType: Sidebar.SourceType
                 }
+                // do we have an existing values that shouldn't be overwritten?
+                if (Sidebar.CreatedAt) { newSidebar.CreatedAt = Sidebar.CreatedAt }
+                if (Sidebar.Status) { newSidebar.Status = Sidebar.Status }
+                if (Sidebar.Source) { newSidebar.Source = Sidebar.Source }
+                if (Sidebar.SourceType) { newSidebar.SourceType = Sidebar.SourceType }
+
                 const Meeting = docRef.data()
                 // Does Meeting.Sidebars exist?
-                if (Meeting.Sidebars) {
+                if (Meeting.Sidebars && Meeting.Sidebars.length > 0) {
                     // here's where we insert the newSidebar
                     Meeting.Sidebars.push(newSidebar)
                 } else {
                     Meeting.Sidebars = [newSidebar]
                 }
+                console.log('AddSidebar:Meeting.Sidebars:')
+                console.log(Meeting.Sidebars)
                 // update FS document (Firestore & Vuex handles the rest with the listeners)
                 meetingRef.update({
                     Sidebars: Meeting.Sidebars

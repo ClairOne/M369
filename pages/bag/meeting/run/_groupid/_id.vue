@@ -205,24 +205,52 @@
                               <span v-else>Mark Complete</span>
                             </v-tooltip>
 
-                            <v-chip
-                              class="ma-2"
-                              color="error"
-                              :outlined="!IsStatusMatch(goal.Status, 'Ongoing')"
-                              @click="setPreviousGoalStatus(goal, 'Ongoing')"
-                            >
-                              <v-icon> mdi-check </v-icon>
-                            </v-chip>
-                            <v-chip
-                              class="ma-2"
-                              color="error"
-                              :outlined="
-                                !IsStatusMatch(goal.Status, 'Cancelled')
-                              "
-                              @click="setPreviousGoalStatus(goal, 'Cancelled')"
-                            >
-                              <v-icon> mdi-check </v-icon>
-                            </v-chip>
+                            <v-tooltip bottom>
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-chip
+                                  v-bind="attrs"
+                                  v-on="on"
+                                  class="ma-2"
+                                  color="error"
+                                  :outlined="
+                                    !IsStatusMatch(goal.Status, 'Ongoing')
+                                  "
+                                  @click="
+                                    setPreviousGoalStatus(goal, 'Ongoing')
+                                  "
+                                >
+                                  <v-icon> mdi-contain-start </v-icon>
+                                </v-chip>
+                              </template>
+                              <span v-if="IsStatusMatch(goal.Status, 'Ongoing')"
+                                >Ongoing</span
+                              >
+                              <span v-else>Mark Ongoing</span>
+                            </v-tooltip>
+
+                            <v-tooltip bottom>
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-chip
+                                  v-bind="attrs"
+                                  v-on="on"
+                                  class="ma-2"
+                                  color="error"
+                                  :outlined="
+                                    !IsStatusMatch(goal.Status, 'Cancelled')
+                                  "
+                                  @click="
+                                    setPreviousGoalStatus(goal, 'Cancelled')
+                                  "
+                                >
+                                  <v-icon> mdi-cancel </v-icon>
+                                </v-chip>
+                              </template>
+                              <span
+                                v-if="IsStatusMatch(goal.Status, 'Cancelled')"
+                                >Cancelled</span
+                              >
+                              <span v-else>Mark Cancelled</span>
+                            </v-tooltip>
                           </td>
                         </tr>
                       </tbody>
@@ -299,30 +327,58 @@
                               <span v-else>Mark Complete</span>
                             </v-tooltip>
 
-                            <v-chip
-                              class="ma-2"
-                              color="error"
-                              :outlined="
-                                !IsStatusMatch(sidebar.Status, 'Ongoing')
-                              "
-                              @click="
-                                setPreviousSidebarStatus(sidebar, 'Ongoing')
-                              "
-                            >
-                              <v-icon> mdi-check </v-icon>
-                            </v-chip>
-                            <v-chip
-                              class="ma-2"
-                              color="error"
-                              :outlined="
-                                !IsStatusMatch(sidebar.Status, 'Cancelled')
-                              "
-                              @click="
-                                setPreviousSidebarStatus(sidebar, 'Cancelled')
-                              "
-                            >
-                              <v-icon> mdi-check </v-icon>
-                            </v-chip>
+                            <v-tooltip bottom>
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-chip
+                                  v-bind="attrs"
+                                  v-on="on"
+                                  class="ma-2"
+                                  color="error"
+                                  :outlined="
+                                    !IsStatusMatch(sidebar.Status, 'Ongoing')
+                                  "
+                                  @click="
+                                    setPreviousSidebarStatus(sidebar, 'Ongoing')
+                                  "
+                                >
+                                  <v-icon> mdi-contain-start </v-icon>
+                                </v-chip>
+                              </template>
+                              <span
+                                v-if="IsStatusMatch(sidebar.Status, 'Ongoing')"
+                                >Ongoing</span
+                              >
+                              <span v-else>Mark Ongoing</span>
+                            </v-tooltip>
+
+                            <v-tooltip bottom>
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-chip
+                                  v-bind="attrs"
+                                  v-on="on"
+                                  class="ma-2"
+                                  color="error"
+                                  :outlined="
+                                    !IsStatusMatch(sidebar.Status, 'Cancelled')
+                                  "
+                                  @click="
+                                    setPreviousSidebarStatus(
+                                      sidebar,
+                                      'Cancelled'
+                                    )
+                                  "
+                                >
+                                  <v-icon> mdi-cancel </v-icon>
+                                </v-chip>
+                              </template>
+                              <span
+                                v-if="
+                                  IsStatusMatch(sidebar.Status, 'Cancelled')
+                                "
+                                >Cancelled</span
+                              >
+                              <span v-else>Mark Cancelled</span>
+                            </v-tooltip>
                           </td>
                         </tr>
                       </tbody>
@@ -552,7 +608,7 @@ export default {
   data() {
     return {
       bottomSheet: false,
-      selectedTab: 1, //@TODO: change this back to 0
+      selectedTab: 0,
       selectedAttendeeIndex: {},
 
       HighTitle: '',
@@ -746,7 +802,7 @@ export default {
         console.log(
           'Meeting is closed.(redirect to report)' + this.Meeting.ClosedAt
         )
-        //this.$router.push('/bag/meeting/report/' + GroupID + '/' + MeetingID)
+        this.$router.push('/bag/meeting/report/' + GroupID + '/' + MeetingID)
       }
 
       if (this.Meeting.StartedAt && !this.Meeting.ClosedAt) {
@@ -884,6 +940,9 @@ export default {
       })
     },
     addSidebar: function () {
+      console.log('this.route:')
+      console.log(this.$route.name)
+
       if (!this.validNewSidebar) {
         return
       }
@@ -892,7 +951,7 @@ export default {
       const Reason = this.SidebarReason
       const RequestedBy = this.selectedAttendee
       const RequestedOf = this.SidebarRequestedOf
-      const Source = this.$route
+      const Source = this.$route.name
       const SourceType = 'page'
 
       const Sidebar = {
