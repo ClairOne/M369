@@ -59,6 +59,15 @@ export default {
                 messagingSenderId: "12311357646",
                 appId: "1:12311357646:web:6c8122047972dab984c89f",
                 measurementId: "G-CYM7C5PPFD"
+            },
+            production: {
+                apiKey: "AIzaSyDMjrb-l-Iv0Y-ARWDOyxzxrNFJMPXQgj8",
+                authDomain: "m369-76d85.firebaseapp.com",
+                projectId: "m369-76d85",
+                storageBucket: "m369-76d85.appspot.com",
+                messagingSenderId: "12311357646",
+                appId: "1:12311357646:web:6c8122047972dab984c89f",
+                measurementId: "G-CYM7C5PPFD"
             }
         },
         services: {
