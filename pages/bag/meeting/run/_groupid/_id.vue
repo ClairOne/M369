@@ -570,9 +570,11 @@
 
               <v-col cols="12" md="3">
                 <h3>Started</h3>
-                <p>{{ Meeting.StartedAt }}</p>
+                <p v-if="Meeting.StartedAt">{{ Meeting.StartedAt }}</p>
+                <p v-else>Not Started</p>
                 <h3>Closed</h3>
-                <p>{{ Meeting.ClosedAt }}</p>
+                <p v-if="Meeting.ClosedAt">{{ Meeting.ClosedAt }}</p>
+                <p v-else>Open</p>
               </v-col>
 
               <v-col cols="12" md="3">
