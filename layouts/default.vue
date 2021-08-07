@@ -50,7 +50,7 @@
       <v-spacer />
       <v-toolbar-title v-text="title" />
       <v-spacer />
-      <USERMENU />
+      <USERMENU v-if="CurrentUser" />
     </v-app-bar>
     <v-main>
       <v-container fluid>
