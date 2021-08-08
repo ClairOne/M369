@@ -68,7 +68,22 @@
                         <span v-else>0</span>
                       </td>
                       <td class="text-right">
-                        <v-tooltip top v-if="meeting.StartedAt">
+                        <v-tooltip
+                          top
+                          v-if="meeting.StartedAt && meeting.ClosedAt"
+                        >
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-icon
+                              color="info"
+                              @click="viewMeeting(meeting.id)"
+                              v-bind="attrs"
+                              v-on="on"
+                              >mdi-file-document-outline</v-icon
+                            >
+                          </template>
+                          <span>View Report.</span>
+                        </v-tooltip>
+                        <v-tooltip top v-else-if="meeting.StartedAt">
                           <template v-slot:activator="{ on, attrs }">
                             <v-icon
                               color="info"
