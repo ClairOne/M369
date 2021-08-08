@@ -5,7 +5,7 @@
 ```bash
 # install 'yarn' 
 $ sudo apt-get install -y nodejs npm
-$ npm install --global yarn
+$ sudo npm install --global yarn
 
 # install dependencies
 $ yarn install
