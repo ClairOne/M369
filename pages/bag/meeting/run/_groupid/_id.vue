@@ -21,6 +21,7 @@
               <v-tab> Previous Items </v-tab>
               <v-tab> Goals </v-tab>
               <v-tab> Sidebars </v-tab>
+              <v-tab> Roadblocks </v-tab>
             </v-tabs>
           </v-container>
           <v-card class="mx-auto" dense>
@@ -551,6 +552,77 @@
               </v-card>
             </v-tab-item>
             <!-- /Sidebars -->
+            <!-- Roadblocks -->
+            <v-tab-item>
+              <v-card class="mx-auto">
+                <v-toolbar color="#a72f39" dark dense>
+                  <v-toolbar-title
+                    >Roadblocks:
+                    <span v-if="selectedAttendee">{{
+                      selectedAttendee.DisplayName
+                    }}</span></v-toolbar-title
+                  >
+                </v-toolbar>
+                <v-card-text>
+                  <v-row class="pl-5 pr-5">
+                    <v-text-field
+                      v-model="RoadblockTitle"
+                      label="Roadblock"
+                      required
+                    ></v-text-field>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      color="success"
+                      class="ma-2 white--text"
+                      @click="addRoadblock()"
+                      :disabled="!validNewRoadblock"
+                    >
+                      <v-icon> mdi-arrow-down-box </v-icon>
+                    </v-btn>
+                  </v-row>
+                  <template>
+                    <v-simple-table>
+                      <thead>
+                        <tr>
+                          <th class="text-center" width="10%">Member</th>
+                          <th class="text-center" width="10%">Status</th>
+                          <th class="text-left" width="50%">Roadblock</th>
+                          <th class="text-center">actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr
+                          v-for="(roadblock, index) in attendeeRoadblocks"
+                          :key="index"
+                        >
+                          <td class="text-center">
+                            <v-chip class="ma-2" color="success" outlined
+                              >{{ roadblock.Member.Initials }}
+                            </v-chip>
+                          </td>
+                          <td class="text-center">{{ roadblock.Status }}</td>
+                          <td class="text-left">
+                            {{ roadblock.Title }}
+                            <v-spacer />
+                          </td>
+                          <td class="text-center">
+                            <v-chip
+                              class="ma-2"
+                              color="error"
+                              outlined
+                              @click="removeRoadblock(roadblock)"
+                            >
+                              <v-icon> mdi-trash-can </v-icon>
+                            </v-chip>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </v-simple-table>
+                  </template>
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
+            <!-- /Roadblocks -->
           </v-tabs-items>
         </v-col>
       </v-row>
@@ -570,9 +642,11 @@
 
               <v-col cols="12" md="3">
                 <h3>Started</h3>
-                <p>{{ Meeting.StartedAt }}</p>
+                <p v-if="Meeting.StartedAt">{{ Meeting.StartedAt }}</p>
+                <p v-else>Not Started</p>
                 <h3>Closed</h3>
-                <p>{{ Meeting.ClosedAt }}</p>
+                <p v-if="Meeting.ClosedAt">{{ Meeting.ClosedAt }}</p>
+                <p v-else>Open</p>
               </v-col>
 
               <v-col cols="12" md="3">
@@ -615,6 +689,7 @@ export default {
       GoalTitle: '',
       SidebarReason: '',
       SidebarRequestedOf: {},
+      RoadblockTitle: '',
     }
   },
   computed: {
@@ -746,6 +821,25 @@ export default {
       })
       return tmpSidebars
     },
+    attendeeRoadblocks() {
+      // are there any Roadblocks in the Meeting, yet?
+      if (!this.Meeting.Roadblocks || this.Meeting.Roadblocks.length === 0) {
+        return []
+      }
+      // should we filter or return them all?
+      if (!this.selectedAttendee || !this.selectedAttendee.Email) {
+        // no Email, return them all
+        return this.Meeting.Roadblocks
+      }
+
+      // use this.Roadblocks which is the full list
+      let tmpRoadblocks = this.Meeting.Roadblocks
+
+      tmpRoadblocks = tmpRoadblocks.filter((item) => {
+        return item.Member.Email == this.selectedAttendee.Email
+      })
+      return tmpRoadblocks
+    },
     validNewHigh() {
       // use a negative trap approach for simplicity (@TODO: convert to using form validation)
       if (!this.selectedAttendee || !this.selectedAttendee.Email) {
@@ -778,6 +872,16 @@ export default {
       }
       // RequestedOf is the selectBox
       if (!this.SidebarRequestedOf || !this.SidebarRequestedOf.Email) {
+        return false
+      }
+      return true
+    },
+    validNewRoadblock() {
+      // use a negative trap approach for simplicity (@TODO: convert to using form validation)
+      if (!this.selectedAttendee || !this.selectedAttendee.Email) {
+        return false
+      }
+      if (!this.RoadblockTitle.length > 0) {
         return false
       }
       return true
@@ -849,6 +953,8 @@ export default {
         IsHigh: IsHigh,
         Member: Attendee,
         Title: this.HighTitle,
+        SourceType: 'bagMeeting',
+        Source: MeetingID,
       }
       this.$store.dispatch('bagMeetings/AddHigh', {
         GroupID,
@@ -870,7 +976,9 @@ export default {
       })
     },
     /*
-    INCOMPLETE
+    INCOMPLETE: Intended to carry the goal from PreviousGoals to Goals
+    if/when the goal is marked at ongoing
+    * Not using it right now due to pending feedback from Gary
     */
     addGoalFromPrevious: function (Goal) {
       console.log('addGoalFromPrevious(Goal):')
@@ -993,6 +1101,40 @@ export default {
         Status,
       })
     },
+    addRoadblock: function () {
+      if (!this.validNewRoadblock) {
+        return
+      }
+      const GroupID = this.$route.params.groupid
+      const MeetingID = this.$route.params.id
+      const Attendee = this.selectedAttendee
+      // build the Roadblock
+      const Roadblock = {
+        Member: Attendee,
+        Title: this.RoadblockTitle,
+        SourceType: 'bagMeeting',
+        Source: MeetingID,
+      }
+      this.$store.dispatch('bagMeetings/AddRoadblock', {
+        GroupID,
+        MeetingID,
+        Roadblock,
+      })
+      // reset the form
+      this.RoadblockTitle = ''
+    },
+    removeRoadblock: function (roadblock) {
+      const GroupID = this.$route.params.groupid
+      const MeetingID = this.$route.params.id
+      const Roadblock = roadblock
+
+      this.$store.dispatch('bagMeetings/RemoveRoadblock', {
+        GroupID,
+        MeetingID,
+        Roadblock,
+      })
+    },
+
     viewGroup: function (groupID) {
       // redirect the UI to the group
       this.$router.push('/bag/group/' + groupID)

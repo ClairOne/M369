@@ -127,6 +127,36 @@
             </v-simple-table>
             <v-container v-else>None</v-container>
           </v-container>
+
+          <v-container fluid>
+            <v-toolbar color="accent" class="white--text" dense rounded>
+              <v-toolbar-title>Roadblocks</v-toolbar-title>
+            </v-toolbar>
+            <v-simple-table
+              dense
+              v-if="attendeeRoadblocks(attendee.Email).length > 0"
+            >
+              <thead>
+                <tr>
+                  <th class="text-left">Roadblock</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr
+                  v-for="(roadblock, index) in attendeeRoadblocks(
+                    attendee.Email
+                  )"
+                  :key="index"
+                >
+                  <td class="text-left">
+                    {{ roadblock.Title }}
+                  </td>
+                </tr>
+              </tbody>
+            </v-simple-table>
+            <v-container v-else>None</v-container>
+          </v-container>
         </v-row>
       </v-card-text>
     </v-card>
@@ -151,6 +181,7 @@ export default {
       Highs: (state) => state.bagMeetings.Meeting.Highs,
       Goals: (state) => state.bagMeetings.Meeting.Goals,
       Sidebars: (state) => state.bagMeetings.Meeting.Sidebars,
+      Roadblocks: (state) => state.bagMeetings.Meeting.Roadblocks,
     }),
     meetingStatus() {
       // has it loaded?
@@ -237,6 +268,24 @@ export default {
         )
       })
       return tmpSidebars
+    },
+    attendeeRoadblocks(AttendeeEmail) {
+      // should we filter or return them all?
+      if (!AttendeeEmail) {
+        // no Email, return them all
+        return this.Roadblocks
+      }
+      // if there are no Meeting.Roadblocks then return an empty array
+      if (!this.Roadblocks) {
+        return []
+      }
+      // use this.Meeting.Roadblocks which is the full list
+      let tmpRoadblocks = this.Roadblocks
+
+      tmpRoadblocks = tmpRoadblocks.filter((item) => {
+        return item.Member.Email == AttendeeEmail
+      })
+      return tmpRoadblocks
     },
   },
   async mounted() {
