@@ -15,18 +15,10 @@
         <v-col cols="12" md="3">
           <v-container>
             <v-tabs v-model="selectedTab" grow vertical>
-              <v-tab>
-                Lows &amp; Highs
-                <v-icon>mdi-arrow-top-right-bottom-left-bold</v-icon>
-              </v-tab>
-              <v-tab>
-                Goals
-                <v-icon>mdi-bullseye-arrow</v-icon>
-              </v-tab>
-              <v-tab>
-                Sidebars
-                <v-icon>mdi-chat-plus-outline</v-icon>
-              </v-tab>
+              <v-tab> Lows &amp; Highs </v-tab>
+              <v-tab> Goals </v-tab>
+              <v-tab> Sidebars </v-tab>
+              <v-tab> Roadblocks </v-tab>
             </v-tabs>
           </v-container>
           <v-card class="mx-auto" dense>
@@ -415,6 +407,95 @@
               </v-card>
             </v-tab-item>
             <!-- /Sidebars -->
+            <!-- Roadblocks -->
+            <v-tab-item>
+              <v-card class="mx-auto">
+                <v-toolbar color="#a72f39" dark dense>
+                  <v-toolbar-title>Sidebars</v-toolbar-title>
+                </v-toolbar>
+                <v-card-text>
+                  <v-container
+                    v-for="(attendee, index) in Meeting.Attendees"
+                    :key="index"
+                  >
+                    <v-toolbar rounded dense color="secondary" dark>{{
+                      attendee.DisplayName
+                    }}</v-toolbar>
+                    <v-row>
+                      <v-col cols="12" md="6">
+                        <v-container>
+                          <v-card rounded dense>
+                            <v-card-title
+                              >Meeting Roadblocks
+                              <v-spacer />
+                              <v-btn
+                                color="success"
+                                @click="setCurrentRoadblocks(attendee)"
+                              >
+                                Make Current</v-btn
+                              >
+                            </v-card-title>
+                            <v-card-text>
+                              <v-simple-table>
+                                <thead>
+                                  <tr>
+                                    <th class="text-left" width="40%">Title</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr
+                                    v-for="(
+                                      roadblock, index
+                                    ) in attendeeMeetingRoadblocks(attendee)"
+                                    :key="index"
+                                  >
+                                    <td class="text-left">
+                                      {{ roadblock.Title }}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </v-simple-table>
+                            </v-card-text>
+                          </v-card>
+                        </v-container>
+                      </v-col>
+                      <v-col cols="12" md="6">
+                        <v-container>
+                          <v-card rounded dense>
+                            <v-card-title>Current Roadblocks </v-card-title>
+                            <v-card-text>
+                              <v-simple-table>
+                                <thead>
+                                  <tr>
+                                    <th class="text-left" width="30%">
+                                      Roadblock
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr
+                                    v-for="(
+                                      roadblock, index
+                                    ) in attendeeCurrentRoadblocks(attendee)"
+                                    :key="index"
+                                  >
+                                    <td class="text-left">
+                                      {{ roadblock.Title }}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </v-simple-table>
+                            </v-card-text>
+                          </v-card>
+                        </v-container>
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                  <template> </template>
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
+            <!-- /Roadblocks -->
           </v-tabs-items>
         </v-col>
       </v-row>
@@ -740,6 +821,65 @@ export default {
         GroupID,
         MemberID,
         Sidebars,
+      })
+    },
+    /*
+        ===== HIGHS =====
+    */
+    /*
+        Filter the Meeting.Roadblocks for a specific Attendee
+    */
+    attendeeMeetingRoadblocks: function (attendee) {
+      if (!attendee || !attendee.Email) {
+        return []
+      }
+      // are there any Roadblocks in the Meeting, yet?
+      if (!this.Meeting.Roadblocks || this.Meeting.Roadblocks.length === 0) {
+        return []
+      }
+      // use this.Meeting.Roadblocks which is the full list
+      let tmpRoadblocks = this.Meeting.Roadblocks
+
+      tmpRoadblocks = tmpRoadblocks.filter((item) => {
+        return item.Member.Email == attendee.Email
+      })
+      return tmpRoadblocks
+    },
+    /*
+        Get the Member.CurrentRoadblocks for an Attendee
+    */
+    attendeeCurrentRoadblocks: function (attendee) {
+      // input good?
+      if (!attendee || !attendee.Email) {
+        return []
+      }
+      // match the Member from the attendee.Email
+      const Member = this.getMemberByEmail(attendee.Email)
+      // return empty set if Member not found
+      if (!Member) {
+        return []
+      }
+      // are there any CurrentRoadblocks for Member?
+      if (!Member.CurrentRoadblocks || Member.CurrentRoadblocks.length === 0) {
+        return []
+      }
+      return Member.CurrentRoadblocks
+    },
+    /*
+        Set the Member.CurrentRoadblocks to attendeeMeetingRoadblocks
+    */
+    setCurrentRoadblocks: function (attendee) {
+      const GroupID = this.$route.params.groupid
+      // match the Member from the attendee.Email
+      const Member = this.getMemberByEmail(attendee.Email)
+      const MemberID = Member.id
+      // get the meeting highs for the attendee
+      const Roadblocks = this.attendeeMeetingRoadblocks(attendee)
+
+      this.$store.dispatch('bagMembers/SetCurrentRoadblocks', {
+        GroupID,
+        MemberID,
+        Roadblocks,
       })
     },
   },

@@ -192,8 +192,16 @@ const actions = {
                     Title: High.Title,
                 }
                 const Meeting = docRef.data()
-                // here's where we insert the newHigh
-                Meeting.Highs.push(newHigh)
+
+                // Does Meeting.Highs exist?
+                if (!Meeting.Highs) {
+                    // create a new array
+                    Meeting.Highs = [newHigh]
+                } else {
+                    // add it to the array
+                    Meeting.Highs.push(newHigh)
+                }
+
                 // update FS document (Firestore & Vuex handles the rest with the listeners)
                 meetingRef.update({
                     Highs: Meeting.Highs
@@ -273,8 +281,6 @@ const actions = {
                 } else {
                     Meeting.Goals = [newGoal]
                 }
-                console.log('AddSidebar:Meeting.Goals:')
-                console.log(Meeting.Goals)
 
                 // update FS document (Firestore & Vuex handles the rest with the listeners)
                 meetingRef.update({
@@ -396,6 +402,73 @@ const actions = {
         });
     },
     /*
+        Add a Roadblock to the Meeting.Roadblocks array
+    */
+    async AddRoadblock({ context }, { GroupID, MeetingID, Roadblock }) {
+        if (!GroupID || !MeetingID || !Roadblock) { return }
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                // Build the Attendee @TODO: create a generic function for this to ensure map standardization
+                const newRoadblock = {
+                    Member: Roadblock.Member, //@TODO: this is where it would be nice to call that function I mentioned above
+                    Title: Roadblock.Title,
+                }
+                const Meeting = docRef.data()
+
+                // Does Meeting.Roadblocks exist?
+                if (!Meeting.Roadblocks) {
+                    // create a new array
+                    Meeting.Roadblocks = [newRoadblock]
+                } else {
+                    // add it to the array
+                    Meeting.Roadblocks.push(newRoadblock)
+                }
+
+                // update FS document (Firestore & Vuex handles the rest with the listeners)
+                meetingRef.update({
+                    Roadblocks: Meeting.Roadblocks
+                })
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+    /*
+        Remove a Roadblock from the Meeting.Roadblocks array
+    */
+    async RemoveRoadblock({ context }, { GroupID, MeetingID, Roadblock }) {
+        if (!GroupID || !MeetingID || !Roadblock) { return }
+        // is it a valid Roadblock.Member object?
+        if (!Roadblock.Member || !Roadblock.Member.Email) { return }
+        // fetch the document
+        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
+        meetingRef.get().then((docRef) => {
+            if (docRef.exists) {
+                const Meeting = docRef.data()
+                // let's build a new list of Roadblocks without the one to be removed
+                let tmpRoadblocks = Meeting.Roadblocks
+                tmpRoadblocks = tmpRoadblocks.filter((item) => {
+                    return (item.Member.Email != Roadblock.Member.Email || item.Title != Roadblock.Title)
+                })
+                // here's where we actually remove the Roadblock
+                meetingRef.update({
+                    Roadblocks: tmpRoadblocks
+                })
+                // Vuex/Firestore takes care of the rest
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Meeting!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+    /*
         Update the status of a PreviousGoal in Meeting.PreviousGoals
     */
     async SetPreviousGoalStatus({ context }, { GroupID, MeetingID, Goal, Status }) {
@@ -443,58 +516,6 @@ const actions = {
             console.log("Error getting document:", error);
         });
     },
-    /*
-        Add a Sidebar to the Meeting.Sidebars array
-    */
-    async AddSidebarx({ context }, { GroupID, MeetingID, Sidebar }) {
-        console.log('AddSidebar(GroupID, MeetingID, Sidebar):' + GroupID + ':' + MeetingID)
-        console.log(Sidebar)
-        if (!GroupID || !MeetingID || !Sidebar) { return }
-        // set the 
-        const tmpDate = new Date()
-        const tmpCreatedAt = `${tmpDate.getFullYear()}-${tmpDate.getMonth() + 1
-            }-${tmpDate.getDate()} ${tmpDate.getHours()}:${(
-                '0' + tmpDate.getMinutes()
-            ).slice(-2)}`
-
-        // fetch the document
-        const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
-        meetingRef.get().then((docRef) => {
-            if (docRef.exists) {
-                // Build the Sidebar @TODO: create a generic function for this to ensure map standardization
-                const newSidebar = {
-                    Reason: Sidebar.Reason,
-                    //                    RequestedBy: Sidebar.RequestedBy, //@TODO: this is where it would be nice to call that function I mentioned above
-                    //                    RequestedOf: Sidebar.RequestedOf,
-                    Status: Sidebar.Status,
-                    CreatedAt: tmpCreatedAt,
-                    Source: Sidebar.Source,
-                    SourceType: Sidebar.SourceType
-                }
-                console.log('newSidebar:')
-                console.log(newSidebar)
-                const Meeting = docRef.data()
-                // Does Meeting.Sidebars exist?
-                if (Meeting.Sidebars) {
-                    // here's where we insert the newSidebar
-                    Meeting.Sidebars.push(newSidebar)
-                } else {
-                    Meeting.Sidebars = [newSidebar]
-                }
-                console.log('Meeting.Sidebars:')
-                console.log(Meeting.Sidebars)
-                // update FS document (Firestore & Vuex handles the rest with the listeners)
-                meetingRef.update({
-                    Sidebars: Meeting.Sidebars
-                })
-            } else {
-                // docRef.data() will be undefined in this case
-                console.log("Invalid Meeting!");
-            }
-        }).catch((error) => {
-            console.log("Error getting document:", error);
-        });
-    },
     async AddSidebar({ context }, { GroupID, MeetingID, Sidebar }) {
         if (!GroupID || !MeetingID || !Sidebar) { return }
         // set the CreatedAt
@@ -532,8 +553,7 @@ const actions = {
                 } else {
                     Meeting.Sidebars = [newSidebar]
                 }
-                console.log('AddSidebar:Meeting.Sidebars:')
-                console.log(Meeting.Sidebars)
+
                 // update FS document (Firestore & Vuex handles the rest with the listeners)
                 meetingRef.update({
                     Sidebars: Meeting.Sidebars

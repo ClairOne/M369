@@ -163,6 +163,36 @@ const actions = {
             console.log("Error getting document:", error);
         });
     },
+    /*
+        Set the CurrentRoadblocks for a bagGroups.Member document
+    */
+    async SetCurrentRoadblocks({ context }, { GroupID, MemberID, Roadblocks }) {
+        if (!GroupID || !MemberID) {
+            console.log('Invalid Member')
+            return
+        }
+        // @TODO: might want to consider a validator at some point
+        if (!Roadblocks) {
+            console.log('Invalid Roadblocks')
+            return
+        }
+        // fetch the document
+        const memberRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Members').doc(MemberID)
+        memberRef.get().then((docRef) => {
+            if (docRef.exists) {
+                // update FS document (Firestore & Vuex handles the rest with the listeners)
+                memberRef.update({
+                    CurrentRoadblocks: Roadblocks
+                })
+            } else {
+                // docRef.data() will be undefined in this case
+                console.log("Invalid Member!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    },
+
 }
 const mutations = {
     BAG_MEMBERS_SET(state, Members) {
