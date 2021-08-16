@@ -1,165 +1,272 @@
 <template>
   <v-container fluid>
-    <v-card>
-      <v-toolbar color="#602034" rounded class="mb-2 white--text" dense>
-        <v-spacer />
-        <v-toolbar-title>Meeting Notes</v-toolbar-title>
-        <v-spacer />
-      </v-toolbar>
-      <v-card-text>
-        <v-row class="pa-3">
-          <v-container fluid>
-            <v-row class="pa-3">
-              <v-col cols="12" md="4">
-                <h3>Group</h3>
-                <p @click="viewGroup(Group.id)">{{ Group.Title }}</p>
-                <h3>Facilitator</h3>
-                <p v-if="Meeting.Facilitator">
-                  {{ Meeting.Facilitator.DisplayName }}
-                </p>
-              </v-col>
-              <v-col cols="12" md="4">
-                <h3>Meeting</h3>
-                <p>{{ Meeting.MeetingDate }}</p>
-                <h3>Status</h3>
-                <p>{{ meetingStatus }}</p>
-              </v-col>
-              <v-col cols="12" md="4">
-                <h3>Started</h3>
-                <p>{{ Meeting.StartedAt }}</p>
-                <h3>Ended</h3>
-                <p>{{ Meeting.ClosedAt }}</p>
-              </v-col>
-            </v-row>
-          </v-container>
+    <h1>{{ Group.Title }} Meeting Notes: {{ Meeting.MeetingDate }}</h1>
+
+    <v-row class="my-5">
+      <v-col cols="6">
+        <h2>Facilitator</h2>
+        <p v-if="Meeting.Facilitator">
+          {{ Meeting.Facilitator.DisplayName }}
+        </p>
+        <h2>Attendees</h2>
+        <v-simple-table>
+          <thead>
+            <tr>
+              <th class="text-left" width="20%">Name</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr v-for="(attendee, index) in Meeting.Attendees" :key="index">
+              <td class="text-left">{{ attendee.DisplayName }}</td>
+            </tr>
+          </tbody>
+        </v-simple-table>
+      </v-col>
+      <v-col cols="6">
+        <h2>Meeting</h2>
+        <p>{{ Meeting.MeetingDateTime }}</p>
+        <h2>Group Info</h2>
+        <h3 @click="viewGroup(Group.id)">{{ Group.Title }}</h3>
+        <p>{{ Group.Description }}</p>
+      </v-col>
+    </v-row>
+
+    <template v-for="attendee in Meeting.Attendees">
+      <v-card :key="'attendeeC' + attendee.Email" class="my-5 pb">
+        <v-toolbar color="secondary" rounded class="mb-2 white--text" dense>
+          <v-toolbar-title>{{ attendee.DisplayName }}</v-toolbar-title>
+        </v-toolbar>
+      </v-card>
+      <v-sheet :key="'attendeeS' + attendee.Email" class="pa-2">
+        <v-row>
+          <v-col cols="6">
+            <v-card class="mb-2">
+              <v-card-subtitle>
+                <v-toolbar-title class="text-center"
+                  >Highs &amp; Lows</v-toolbar-title
+                >
+              </v-card-subtitle>
+              <v-card-text>
+                <v-simple-table
+                  dense
+                  v-if="attendeeHighs(attendee.Email).length > 0"
+                >
+                  <thead>
+                    <tr>
+                      <th class="text-left" width="20%">Status</th>
+                      <th class="text-left">Title</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr
+                      v-for="(high, index) in attendeeHighs(attendee.Email)"
+                      :key="index"
+                    >
+                      <td class="text-left">
+                        <span v-if="high.IsHigh">High</span>
+                        <span v-else>Low</span>
+                      </td>
+                      <td class="text-left">{{ high.Title }}</td>
+                    </tr>
+                  </tbody>
+                </v-simple-table>
+                <v-container v-else>None</v-container>
+              </v-card-text>
+            </v-card>
+            <v-card class="mb-2">
+              <v-card-subtitle>
+                <v-toolbar-title class="text-center"
+                  >Roadblocks</v-toolbar-title
+                >
+              </v-card-subtitle>
+              <v-card-text>
+                <v-simple-table
+                  dense
+                  v-if="attendeeRoadblocks(attendee.Email).length > 0"
+                >
+                  <tbody>
+                    <tr
+                      v-for="(roadblock, index) in attendeeRoadblocks(
+                        attendee.Email
+                      )"
+                      :key="index"
+                    >
+                      <td class="text-left">
+                        {{ roadblock.Title }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-simple-table>
+                <v-container v-else>None</v-container>
+              </v-card-text>
+            </v-card>
+          </v-col>
+          <v-col cols="6">
+            <v-card class="mb-2">
+              <v-card-subtitle>
+                <v-toolbar-title class="text-center">Sidebars</v-toolbar-title>
+              </v-card-subtitle>
+              <v-card-text>
+                <v-simple-table
+                  dense
+                  v-if="attendeeSidebars(attendee.Email).length > 0"
+                >
+                  <thead>
+                    <tr>
+                      <th class="text-left" width="80%">Current</th>
+                      <th class="text-right" width="20%">Status</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <template>
+                      <tr
+                        v-for="(sidebar, index) in attendeeSidebars(
+                          attendee.Email
+                        )"
+                        :key="index"
+                      >
+                        <td colspan="2">
+                          <v-simple-table dense>
+                            <tr>
+                              <td class="text-left" width="80%">
+                                {{ sidebar.RequestedBy.DisplayName }} ->
+                                {{ sidebar.RequestedOf.DisplayName }}
+                              </td>
+                              <td class="text-right py-1" width="20%">
+                                {{ sidebar.Status }}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="text-left py-1" colspan="2">
+                                {{ sidebar.Reason }}
+                              </td>
+                            </tr>
+                          </v-simple-table>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </v-simple-table>
+                <v-container v-else>No Current Sidebars</v-container>
+                <v-simple-table
+                  dense
+                  v-if="attendeePreviousSidebars(attendee.Email).length > 0"
+                >
+                  <thead>
+                    <tr>
+                      <th class="text-left" width="80%">Previous</th>
+                      <th class="text-right" width="20%">Status</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr
+                      v-for="(sidebar, index) in attendeePreviousSidebars(
+                        attendee.Email
+                      )"
+                      :key="index"
+                    >
+                      <td colspan="2">
+                        <v-simple-table dense>
+                          <tr>
+                            <td class="text-left" width="80%">
+                              {{ sidebar.RequestedBy.DisplayName }} ->
+                              {{ sidebar.RequestedOf.DisplayName }}
+                            </td>
+                            <td class="text-right py-1" width="20%">
+                              {{ sidebar.Status }}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="text-left py-1" colspan="2">
+                              {{ sidebar.Reason }}
+                            </td>
+                          </tr>
+                        </v-simple-table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-simple-table>
+                <v-container v-else>No Previous Sidebars</v-container>
+              </v-card-text>
+            </v-card>
+          </v-col>
         </v-row>
-        <v-row
-          v-for="attendee in Meeting.Attendees"
-          :key="attendee.Email"
-          class="pa-5 pb"
-        >
-          <v-container fluid>
-            <v-toolbar color="secondary" class="white--text" dense rounded>
-              <v-toolbar-title>{{ attendee.DisplayName }}</v-toolbar-title>
-            </v-toolbar>
-          </v-container>
-          <v-container fluid>
-            <v-toolbar color="accent" class="white--text" dense rounded>
-              <v-toolbar-title>Highs &amp; Lows</v-toolbar-title>
-            </v-toolbar>
-            <v-simple-table dense>
-              <thead>
-                <tr>
-                  <th class="text-left" width="20%">Status</th>
-                  <th class="text-left">Title</th>
-                </tr>
-              </thead>
 
-              <tbody>
-                <tr
-                  v-for="(high, index) in attendeeHighs(attendee.Email)"
-                  :key="index"
-                >
-                  <td class="text-left">
-                    <span v-if="high.IsHigh">High</span>
-                    <span v-else>Low</span>
-                  </td>
-                  <td class="text-left">{{ high.Title }}</td>
-                </tr>
-              </tbody>
-            </v-simple-table>
-          </v-container>
+        <v-row>
+          <v-col cols="12">
+            <v-card class="mb-2">
+              <v-card-subtitle>
+                <v-toolbar-title class="text-center">Goals</v-toolbar-title>
+              </v-card-subtitle>
+              <v-card-text>
+                <v-row>
+                  <v-col cols="6">
+                    <v-toolbar-title class="text-center"
+                      >Previous</v-toolbar-title
+                    >
+                    <v-simple-table
+                      dense
+                      v-if="attendeePreviousGoals(attendee.Email).length > 0"
+                    >
+                      <thead>
+                        <tr>
+                          <th class="text-left" width="20%">Status</th>
+                          <th class="text-left">Title</th>
+                        </tr>
+                      </thead>
 
-          <v-container fluid>
-            <v-toolbar color="accent" class="white--text" dense rounded>
-              <v-toolbar-title>Goals</v-toolbar-title>
-            </v-toolbar>
-            <v-simple-table dense>
-              <thead>
-                <tr>
-                  <th class="text-left" width="20%">Status</th>
-                  <th class="text-left">Title</th>
-                </tr>
-              </thead>
+                      <tbody>
+                        <tr
+                          v-for="(goal, index) in attendeePreviousGoals(
+                            attendee.Email
+                          )"
+                          :key="index"
+                        >
+                          <td class="text-left">{{ goal.Status }}</td>
+                          <td class="text-left">{{ goal.Title }}</td>
+                        </tr>
+                      </tbody>
+                    </v-simple-table>
+                    <v-container v-else>None</v-container>
+                  </v-col>
+                  <v-col cols="6">
+                    <v-toolbar-title class="text-center"
+                      >Current</v-toolbar-title
+                    >
+                    <v-simple-table
+                      dense
+                      v-if="attendeeGoals(attendee.Email).length > 0"
+                    >
+                      <thead>
+                        <tr>
+                          <th class="text-left" width="20%">Status</th>
+                          <th class="text-left">Title</th>
+                        </tr>
+                      </thead>
 
-              <tbody>
-                <tr
-                  v-for="(goal, index) in attendeeGoals(attendee.Email)"
-                  :key="index"
-                >
-                  <td class="text-left">{{ goal.Status }}</td>
-                  <td class="text-left">{{ goal.Title }}</td>
-                </tr>
-              </tbody>
-            </v-simple-table>
-          </v-container>
-
-          <v-container fluid>
-            <v-toolbar color="accent" class="white--text" dense rounded>
-              <v-toolbar-title>Sidebars</v-toolbar-title>
-            </v-toolbar>
-            <v-simple-table
-              dense
-              v-if="attendeeSidebars(attendee.Email).length > 0"
-            >
-              <thead>
-                <tr>
-                  <th class="text-left" width="20%">Requested By</th>
-                  <th class="text-left" width="20%">Requested Of</th>
-                  <th class="text-left">Reson</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <tr
-                  v-for="(sidebar, index) in attendeeSidebars(attendee.Email)"
-                  :key="index"
-                >
-                  <td class="text-left">
-                    {{ sidebar.RequestedBy.DisplayName }}
-                  </td>
-                  <td class="text-left">
-                    {{ sidebar.RequestedOf.DisplayName }}
-                  </td>
-                  <td class="text-left">{{ sidebar.Reason }}</td>
-                </tr>
-              </tbody>
-            </v-simple-table>
-            <v-container v-else>None</v-container>
-          </v-container>
-
-          <v-container fluid>
-            <v-toolbar color="accent" class="white--text" dense rounded>
-              <v-toolbar-title>Roadblocks</v-toolbar-title>
-            </v-toolbar>
-            <v-simple-table
-              dense
-              v-if="attendeeRoadblocks(attendee.Email).length > 0"
-            >
-              <thead>
-                <tr>
-                  <th class="text-left">Roadblock</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <tr
-                  v-for="(roadblock, index) in attendeeRoadblocks(
-                    attendee.Email
-                  )"
-                  :key="index"
-                >
-                  <td class="text-left">
-                    {{ roadblock.Title }}
-                  </td>
-                </tr>
-              </tbody>
-            </v-simple-table>
-            <v-container v-else>None</v-container>
-          </v-container>
+                      <tbody>
+                        <tr
+                          v-for="(goal, index) in attendeeGoals(attendee.Email)"
+                          :key="index"
+                        >
+                          <td class="text-left">{{ goal.Status }}</td>
+                          <td class="text-left">{{ goal.Title }}</td>
+                        </tr>
+                      </tbody>
+                    </v-simple-table>
+                    <v-container v-else>None</v-container>
+                  </v-col>
+                </v-row>
+              </v-card-text>
+            </v-card>
+          </v-col>
         </v-row>
-      </v-card-text>
-    </v-card>
+      </v-sheet>
+    </template>
   </v-container>
 </template>
 
@@ -212,14 +319,14 @@ export default {
       this.$router.push('/bag/group/' + groupID)
     },
     attendeeHighs(AttendeeEmail) {
+      // if there are no Meeting.Highs then return an empty array
+      if (!this.Highs) {
+        return []
+      }
       // should we filter or return them all?
       if (!AttendeeEmail) {
         // no Email, return them all
         return this.Highs
-      }
-      // if there are no Meeting.Highs then return an empty array
-      if (!this.Highs) {
-        return []
       }
       // use this.Meeting.Highs which is the full list
       let tmpHighs = this.Highs
@@ -229,15 +336,34 @@ export default {
       })
       return tmpHighs
     },
+    attendeePreviousHighs(AttendeeEmail) {
+      // if there are no Meeting.PreviousHighs then return an empty array
+      if (!this.Meeting.PreviousHighs) {
+        return []
+      }
+      // should we filter or return them all?
+      if (!AttendeeEmail) {
+        // no Email, return them all
+        return this.Meeting.PreviousHighs
+      }
+      // use this.Meeting.PreviousHighs which is the full list
+      let tmpHighs = this.Meeting.PreviousHighs
+
+      tmpHighs = tmpHighs.filter((item) => {
+        return item.Member.Email == AttendeeEmail
+      })
+      return tmpHighs
+    },
+
     attendeeGoals(AttendeeEmail) {
+      // if there are no Meeting.Goals then return an empty array
+      if (!this.Goals) {
+        return []
+      }
       // should we filter or return them all?
       if (!AttendeeEmail) {
         // no Email, return them all
         return this.Goals
-      }
-      // if there are no Meeting.Goals then return an empty array
-      if (!this.Goals) {
-        return []
       }
       // use this.Goals which is the full list
       let tmpGoals = this.Goals
@@ -247,19 +373,59 @@ export default {
       })
       return tmpGoals
     },
+    attendeePreviousGoals(AttendeeEmail) {
+      // if there are no Meeting.PreviousGoals then return an empty array
+      if (!this.Meeting.PreviousGoals) {
+        return []
+      }
+      // should we filter or return them all?
+      if (!AttendeeEmail) {
+        // no Email, return them all
+        return this.Meeting.PreviousGoals
+      }
+      // use this.Goals which is the full list
+      let tmpGoals = this.Meeting.PreviousGoals
+
+      tmpGoals = tmpGoals.filter((item) => {
+        return item.Member.Email == AttendeeEmail
+      })
+      return tmpGoals
+    },
     attendeeSidebars(AttendeeEmail) {
+      // if there are no Meeting.Sidebars then return an empty array
+      if (!this.Sidebars) {
+        return []
+      }
       // should we filter or return them all?
       if (!AttendeeEmail) {
         // no Email, return them all
         return this.Sidebars
       }
-      // if there are no Meeting.Sidebars then return an empty array
-      if (!this.Sidebars) {
-        return []
-      }
 
       // use this.Sidebars which is the full list
       let tmpSidebars = this.Sidebars
+
+      tmpSidebars = tmpSidebars.filter((item) => {
+        return (
+          item.RequestedBy.Email == AttendeeEmail ||
+          item.RequestedOf.Email == AttendeeEmail
+        )
+      })
+      return tmpSidebars
+    },
+    attendeePreviousSidebars(AttendeeEmail) {
+      // if there are no Meeting.Sidebars then return an empty array
+      if (!this.Meeting.PreviousSidebars) {
+        return []
+      }
+      // should we filter or return them all?
+      if (!AttendeeEmail) {
+        // no Email, return them all
+        return this.Meeting.PreviousSidebars
+      }
+
+      // use this.Meeting.PreviousSidebars which is the full list
+      let tmpSidebars = this.Meeting.PreviousSidebars
 
       tmpSidebars = tmpSidebars.filter((item) => {
         return (

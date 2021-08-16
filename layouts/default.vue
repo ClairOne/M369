@@ -58,7 +58,7 @@
       </v-container>
     </v-main>
 
-    <v-footer :absolute="!fixed" app>
+    <v-footer :absolute="!fixed" app class="no-print">
       <span>&copy; {{ new Date().getFullYear() }}</span>
     </v-footer>
   </v-app>
@@ -75,7 +75,7 @@ export default {
   data() {
     return {
       clipped: true,
-      drawer: false,
+      drawer: true,
       fixed: true,
       items: [
         {
@@ -84,19 +84,14 @@ export default {
           to: '/',
         },
         {
+          icon: 'mdi-bullseye-arrow',
+          title: 'Goals',
+          to: '/goals',
+        },
+        {
           icon: 'mdi-car-turbocharger',
           title: 'Accountability',
           to: '/bag',
-        },
-        {
-          icon: 'mdi-wrench',
-          title: 'FTN',
-          to: '/ftn',
-        },
-        {
-          icon: 'mdi-point-of-sale',
-          title: 'Zero To One',
-          to: '/zto',
         },
       ],
       miniVariant: false,
