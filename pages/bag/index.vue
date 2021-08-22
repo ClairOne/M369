@@ -11,7 +11,6 @@
           <tr>
             <th class="text-left">Icon</th>
             <th class="text-left">Group</th>
-            <th class="text-left">Member</th>
             <th class="text-left">Description</th>
           </tr>
         </thead>
@@ -26,10 +25,6 @@
             </td>
             <td class="text-left">
               {{ group.Title }}
-            </td>
-            <td class="text-left">
-              <span v-if="group.Members">{{ group.Members.length }}</span>
-              <span v-else>0</span>
             </td>
             <td class="text-left">
               {{ group.Description }}
