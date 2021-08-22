@@ -25,6 +25,7 @@
         <v-card-actions class="text-center">
           <v-spacer />
           <v-btn
+            id="loginButton"
             rounded
             color="info"
             class="login-button"

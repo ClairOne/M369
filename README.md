@@ -19,6 +19,14 @@ $ yarn generate
 # build for production(firebase hosting) and deploy
 $ yarn generate
 $ firebase deploy --only hosting
+
+# testing
+$ yarn add cypress --dev (this was already done)
+$ yarn run cypress open
+
+# Note: 2021-08-22 Dave
+# I did a couple of rudimentary tests to ensure cypress was working.
+# might dig into this more in the future, but focusing on features for now
 ```
 
 For detailed explanation on how things work, check out the [documentation](https://nuxtjs.org).

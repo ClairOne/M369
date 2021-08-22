@@ -6,12 +6,11 @@
       <NEWGROUP btnColor="white" btnTextColor="#01937c" btnSize="24" />
     </v-toolbar>
     <v-container fluid>
-      <v-simple-table>
+      <v-simple-table id="bagGroup-list">
         <thead>
           <tr>
             <th class="text-left">Icon</th>
             <th class="text-left">Group</th>
-            <th class="text-left">Member</th>
             <th class="text-left">Description</th>
           </tr>
         </thead>
@@ -20,16 +19,13 @@
             v-for="group in Groups"
             :key="group.id"
             @click="viewGroup(group.id)"
+            class="bagGroup-list-item"
           >
             <td class="text-left">
               <v-icon>{{ group.Icon }}</v-icon>
             </td>
             <td class="text-left">
               {{ group.Title }}
-            </td>
-            <td class="text-left">
-              <span v-if="group.Members">{{ group.Members.length }}</span>
-              <span v-else>0</span>
             </td>
             <td class="text-left">
               {{ group.Description }}
