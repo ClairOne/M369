@@ -18,7 +18,6 @@
           <v-container>
             <v-tabs v-model="selectedTab" grow vertical>
               <v-tab> Lows &amp; Highs </v-tab>
-              <v-tab> Previous Items </v-tab>
               <v-tab> Goals </v-tab>
               <v-tab> Sidebars </v-tab>
               <v-tab> Roadblocks </v-tab>
@@ -59,472 +58,345 @@
             <v-tab-item>
               <v-card class="mx-auto">
                 <v-toolbar color="#a72f39" dark dense>
-                  <v-toolbar-title
-                    >Highs &amp; Lows:
-                    <span v-if="selectedAttendee">{{
-                      selectedAttendee.DisplayName
-                    }}</span></v-toolbar-title
-                  >
+                  <v-toolbar-title>Highs &amp; Lows</v-toolbar-title>
+                  <v-spacer></v-spacer>
+                  <span v-if="selectedAttendee">{{
+                    selectedAttendee.DisplayName
+                  }}</span>
+                  <v-spacer></v-spacer>
                 </v-toolbar>
                 <v-card-text>
-                  <v-row class="pl-5 pr-5">
-                    <v-text-field
-                      v-model="HighTitle"
-                      label="High"
-                      required
-                    ></v-text-field>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      color="success"
-                      class="ma-2 white--text"
-                      @click="addHigh(true)"
-                      :disabled="!validNewHigh"
-                    >
-                      <v-icon> mdi-arrow-up-box </v-icon>
-                    </v-btn>
-                    <v-btn
-                      color="error"
-                      class="ma-2 white--text"
-                      @click="addHigh(false)"
-                      :disabled="!validNewHigh"
-                    >
-                      <v-icon> mdi-arrow-down-box </v-icon>
-                    </v-btn>
-                  </v-row>
-                  <template>
-                    <v-simple-table>
-                      <thead>
-                        <tr>
-                          <th class="text-center" width="10%">Member</th>
-                          <th class="text-center" width="10%">H/L</th>
-                          <th class="text-left" width="50%">Description</th>
-                          <th class="text-center">actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="(high, index) in attendeeHighs" :key="index">
-                          <td class="text-center">
-                            <v-chip class="ma-2" color="success" outlined
-                              >{{ high.Member.Initials }}
-                            </v-chip>
-                          </td>
-                          <td class="text-center">
-                            <v-chip
-                              v-if="high.IsHigh"
-                              class="ma-2"
-                              color="success"
-                              outlined
-                            >
-                              <v-icon> mdi-arrow-up-box </v-icon>
-                            </v-chip>
+                  <v-card class="mb-5" rounded>
+                    <v-card-text>
+                      <v-overlay
+                        absolute="true"
+                        :value="!selectedAttendee || !selectedAttendee.Email"
+                      >
+                        <h3>Select an attendee</h3>
+                      </v-overlay>
+                      <v-row>
+                        <v-col cols="9">
+                          <v-text-field
+                            v-model="HighTitle"
+                            label="High"
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="3" class="text-center">
+                          <v-btn
+                            color="success"
+                            class="ma-2 white--text"
+                            @click="addHigh(true)"
+                            :disabled="!validNewHigh"
+                          >
+                            <v-icon> mdi-arrow-up-box </v-icon>
+                          </v-btn>
+                          <v-btn
+                            color="error"
+                            class="ma-2 white--text"
+                            @click="addHigh(false)"
+                            :disabled="!validNewHigh"
+                          >
+                            <v-icon> mdi-arrow-down-box </v-icon>
+                          </v-btn>
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                  </v-card>
+                  <v-simple-table>
+                    <thead>
+                      <tr>
+                        <th class="text-center" width="10%">Member</th>
+                        <th class="text-center" width="10%">H/L</th>
+                        <th class="text-left" width="50%">Description</th>
+                        <th class="text-center">actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(high, index) in attendeeHighs" :key="index">
+                        <td class="text-center">
+                          <v-chip class="ma-2" color="success" outlined
+                            >{{ high.Member.Initials }}
+                          </v-chip>
+                        </td>
+                        <td class="text-center">
+                          <v-chip
+                            v-if="high.IsHigh"
+                            class="ma-2"
+                            color="success"
+                            outlined
+                          >
+                            <v-icon> mdi-arrow-up-box </v-icon>
+                          </v-chip>
 
-                            <v-chip v-else class="ma-2" color="error" outlined>
-                              <v-icon> mdi-arrow-down-box </v-icon>
-                            </v-chip>
-                          </td>
-                          <td class="text-left">
-                            {{ high.Title }}
-                            <v-spacer />
-                          </td>
-                          <td class="text-center">
-                            <v-chip
-                              class="ma-2"
-                              color="error"
-                              outlined
-                              @click="removeHigh(high)"
-                            >
-                              <v-icon> mdi-trash-can </v-icon>
-                            </v-chip>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </v-simple-table>
-                  </template>
+                          <v-chip v-else class="ma-2" color="error" outlined>
+                            <v-icon> mdi-arrow-down-box </v-icon>
+                          </v-chip>
+                        </td>
+                        <td class="text-left">
+                          {{ high.Title }}
+                          <v-spacer />
+                        </td>
+                        <td class="text-center">
+                          <v-chip
+                            class="ma-2"
+                            color="error"
+                            outlined
+                            @click="removeHigh(high)"
+                          >
+                            <v-icon> mdi-trash-can </v-icon>
+                          </v-chip>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </v-simple-table>
                 </v-card-text>
               </v-card>
             </v-tab-item>
             <!-- /Highs -->
-            <!-- Previous -->
-            <v-tab-item>
-              <v-card class="mx-auto">
-                <v-toolbar color="#a72f39" dark dense>
-                  <v-toolbar-title
-                    >Previous Goals:
-                    <span v-if="selectedAttendee">{{
-                      selectedAttendee.DisplayName
-                    }}</span></v-toolbar-title
-                  >
-                </v-toolbar>
-                <v-card-text> </v-card-text>
-              </v-card>
-              <v-card class="mx-auto">
-                <v-toolbar color="#a72f39" dark dense>
-                  <v-toolbar-title
-                    >Previous Sidebars:
-                    <span v-if="selectedAttendee">{{
-                      selectedAttendee.DisplayName
-                    }}</span></v-toolbar-title
-                  >
-                </v-toolbar>
-                <v-card-text>
-                  <template>
-                    <v-simple-table>
-                      <thead>
-                        <tr>
-                          <th class="text-center" width="10%">RequestedBy</th>
-                          <th class="text-center" width="10%">RequestedOf</th>
-                          <th class="text-center" width="10%">Status</th>
-                          <th class="text-left">Reason</th>
-                          <th class="text-center" width="30%">actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr
-                          v-for="(sidebar, index) in attendeePreviousSidebars"
-                          :key="index"
-                        >
-                          <td class="text-center">
-                            <v-chip class="ma-2" color="success" outlined
-                              >{{ sidebar.RequestedBy.Initials }}
-                            </v-chip>
-                          </td>
-                          <td class="text-center">
-                            <v-chip class="ma-2" color="success" outlined
-                              >{{ sidebar.RequestedOf.Initials }}
-                            </v-chip>
-                          </td>
-                          <td class="text-center">{{ sidebar.Status }}</td>
-                          <td class="text-left">
-                            {{ sidebar.Reason }}
-                            <v-spacer />
-                          </td>
-                          <td class="text-center">
-                            <v-tooltip bottom>
-                              <template v-slot:activator="{ on, attrs }">
-                                <v-chip
-                                  v-bind="attrs"
-                                  v-on="on"
-                                  class="ma-2"
-                                  color="success"
-                                  :outlined="
-                                    !IsStatusMatch(sidebar.Status, 'Complete')
-                                  "
-                                  @click="
-                                    setPreviousSidebarStatus(
-                                      sidebar,
-                                      'Complete'
-                                    )
-                                  "
-                                >
-                                  <v-icon> mdi-check </v-icon>
-                                </v-chip>
-                              </template>
-                              <span
-                                v-if="IsStatusMatch(sidebar.Status, 'Complete')"
-                                >Completed</span
-                              >
-                              <span v-else>Mark Complete</span>
-                            </v-tooltip>
-
-                            <v-tooltip bottom>
-                              <template v-slot:activator="{ on, attrs }">
-                                <v-chip
-                                  v-bind="attrs"
-                                  v-on="on"
-                                  class="ma-2"
-                                  color="error"
-                                  :outlined="
-                                    !IsStatusMatch(sidebar.Status, 'Ongoing')
-                                  "
-                                  @click="
-                                    setPreviousSidebarStatus(sidebar, 'Ongoing')
-                                  "
-                                >
-                                  <v-icon> mdi-contain-start </v-icon>
-                                </v-chip>
-                              </template>
-                              <span
-                                v-if="IsStatusMatch(sidebar.Status, 'Ongoing')"
-                                >Ongoing</span
-                              >
-                              <span v-else>Mark Ongoing</span>
-                            </v-tooltip>
-
-                            <v-tooltip bottom>
-                              <template v-slot:activator="{ on, attrs }">
-                                <v-chip
-                                  v-bind="attrs"
-                                  v-on="on"
-                                  class="ma-2"
-                                  color="error"
-                                  :outlined="
-                                    !IsStatusMatch(sidebar.Status, 'Cancelled')
-                                  "
-                                  @click="
-                                    setPreviousSidebarStatus(
-                                      sidebar,
-                                      'Cancelled'
-                                    )
-                                  "
-                                >
-                                  <v-icon> mdi-cancel </v-icon>
-                                </v-chip>
-                              </template>
-                              <span
-                                v-if="
-                                  IsStatusMatch(sidebar.Status, 'Cancelled')
-                                "
-                                >Cancelled</span
-                              >
-                              <span v-else>Mark Cancelled</span>
-                            </v-tooltip>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </v-simple-table>
-                  </template>
-                </v-card-text>
-              </v-card>
-            </v-tab-item>
-            <!-- /Previous -->
             <!-- Goals -->
             <v-tab-item>
               <v-card class="mx-auto">
                 <v-toolbar color="#a72f39" dark dense>
-                  <v-toolbar-title
-                    >Goals:
-                    <span v-if="selectedAttendee">{{
-                      selectedAttendee.DisplayName
-                    }}</span></v-toolbar-title
-                  >
+                  <v-toolbar-title>Goals</v-toolbar-title>
+                  <v-spacer></v-spacer>
+                  <span v-if="selectedAttendee">{{
+                    selectedAttendee.DisplayName
+                  }}</span>
+                  <v-spacer></v-spacer>
                 </v-toolbar>
                 <v-card-text>
+                  <v-card class="mb-5" rounded>
+                    <v-card-text>
+                      <v-overlay
+                        absolute="true"
+                        :value="!selectedAttendee || !selectedAttendee.Email"
+                      >
+                        <h3>Select an attendee</h3>
+                      </v-overlay>
+                      <v-row>
+                        <v-col cols="10">
+                          <v-text-field
+                            v-model="GoalTitle"
+                            label="New Goal"
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="2" class="text-center">
+                          <v-btn
+                            color="primary"
+                            class="ma-2 white--text"
+                            @click="addGoal()"
+                            :disabled="!validNewGoal"
+                          >
+                            <v-icon> mdi-arrow-down-box </v-icon>
+                          </v-btn>
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                  </v-card>
                   <v-row>
                     <v-col cols="12" md="6">
-                      <template>
-                        <h2>Previous</h2>
-                        <v-simple-table
-                          dense
-                          class="pa-0"
-                          v-if="attendeePreviousGoals.length > 0"
-                        >
-                          <thead>
-                            <tr>
-                              <th class="text-center" width="30%">Member</th>
-                              <th class="text-left pa-0" width="70%">
-                                Previous Goal
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <template>
-                              <tr
-                                v-for="(goal, index) in attendeePreviousGoals"
-                                :key="index"
-                              >
-                                <td colspan="2" class="pa-0">
-                                  <v-simple-table dense>
-                                    <tr>
-                                      <td class="text-center" width="30%">
-                                        <v-chip
-                                          class="my-2"
-                                          color="success"
-                                          outlined
-                                          >{{ goal.Member.Initials }}
-                                        </v-chip>
-                                      </td>
-                                      <td class="text-left" width="70%">
-                                        {{ goal.Title }}
-                                        <v-spacer />
-                                      </td>
-                                    </tr>
-                                    <tr>
-                                      <td width="20%"></td>
-                                      <td class="text-left">
-                                        <v-tooltip bottom>
-                                          <template
-                                            v-slot:activator="{ on, attrs }"
-                                          >
-                                            <v-chip
-                                              v-bind="attrs"
-                                              v-on="on"
-                                              class="my-2"
-                                              color="success"
-                                              :outlined="
-                                                !IsStatusMatch(
-                                                  goal.Status,
-                                                  'Complete'
-                                                )
-                                              "
-                                              @click="
-                                                setPreviousGoalStatus(
-                                                  goal,
-                                                  'Complete'
-                                                )
-                                              "
-                                            >
-                                              <v-icon> mdi-check </v-icon>
-                                            </v-chip>
-                                          </template>
-                                          <span
-                                            v-if="
-                                              IsStatusMatch(
+                      <h2>Previous</h2>
+                      <v-simple-table v-if="attendeePreviousGoals.length > 0">
+                        <thead>
+                          <tr>
+                            <th class="text-center" width="30%">Member</th>
+                            <th class="text-left pa-0" width="70%">
+                              Previous Goal
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <template>
+                            <tr
+                              v-for="(goal, index) in attendeePreviousGoals"
+                              :key="index"
+                            >
+                              <td colspan="2" class="pa-0">
+                                <v-simple-table dense>
+                                  <tr>
+                                    <td class="text-center" width="30%">
+                                      <v-chip
+                                        class="my-2"
+                                        color="success"
+                                        outlined
+                                        >{{ goal.Member.Initials }}
+                                      </v-chip>
+                                    </td>
+                                    <td class="text-left" width="70%">
+                                      {{ goal.Title }}
+                                      <v-spacer />
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td width="20%"></td>
+                                    <td class="text-left">
+                                      <v-tooltip bottom>
+                                        <template
+                                          v-slot:activator="{ on, attrs }"
+                                        >
+                                          <v-chip
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            class="my-2"
+                                            color="success"
+                                            :outlined="
+                                              !IsStatusMatch(
                                                 goal.Status,
                                                 'Complete'
                                               )
                                             "
-                                            >Completed</span
-                                          >
-                                          <span v-else>Mark Complete</span>
-                                        </v-tooltip>
-                                        <v-tooltip bottom>
-                                          <template
-                                            v-slot:activator="{ on, attrs }"
-                                          >
-                                            <v-chip
-                                              v-bind="attrs"
-                                              v-on="on"
-                                              class="mx-4 my-2"
-                                              color="error"
-                                              :outlined="
-                                                !IsStatusMatch(
-                                                  goal.Status,
-                                                  'Ongoing,Carryover'
-                                                )
-                                              "
-                                              @click="
-                                                carryoverPreviousGoal(goal)
-                                              "
-                                            >
-                                              <v-icon>
-                                                mdi-contain-start
-                                              </v-icon>
-                                            </v-chip>
-                                          </template>
-                                          <span
-                                            v-if="
-                                              IsStatusMatch(
-                                                goal.Status,
-                                                'Ongoing'
+                                            @click="
+                                              setPreviousGoalStatus(
+                                                goal,
+                                                'Complete'
                                               )
                                             "
-                                            >Ongoing</span
                                           >
-                                          <span v-else>Mark Ongoing</span>
-                                        </v-tooltip>
+                                            <v-icon> mdi-check </v-icon>
+                                          </v-chip>
+                                        </template>
+                                        <span
+                                          v-if="
+                                            IsStatusMatch(
+                                              goal.Status,
+                                              'Complete'
+                                            )
+                                          "
+                                          >Completed</span
+                                        >
+                                        <span v-else>Mark Complete</span>
+                                      </v-tooltip>
+                                      <v-tooltip bottom>
+                                        <template
+                                          v-slot:activator="{ on, attrs }"
+                                        >
+                                          <v-chip
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            class="mx-4 my-2"
+                                            color="warning"
+                                            :outlined="
+                                              !IsStatusMatch(
+                                                goal.Status,
+                                                'Ongoing,Carryover'
+                                              )
+                                            "
+                                            @click="carryoverPreviousGoal(goal)"
+                                          >
+                                            <v-icon>
+                                              mdi-application-export
+                                            </v-icon>
+                                          </v-chip>
+                                        </template>
+                                        <span
+                                          v-if="
+                                            IsStatusMatch(
+                                              goal.Status,
+                                              'Ongoing,Carryover'
+                                            )
+                                          "
+                                          >Ongoing</span
+                                        >
+                                        <span v-else>Mark Ongoing</span>
+                                      </v-tooltip>
 
-                                        <v-tooltip bottom>
-                                          <template
-                                            v-slot:activator="{ on, attrs }"
-                                          >
-                                            <v-chip
-                                              v-bind="attrs"
-                                              v-on="on"
-                                              class="my-2"
-                                              color="error"
-                                              :outlined="
-                                                !IsStatusMatch(
-                                                  goal.Status,
-                                                  'Cancelled'
-                                                )
-                                              "
-                                              @click="
-                                                setPreviousGoalStatus(
-                                                  goal,
-                                                  'Cancelled'
-                                                )
-                                              "
-                                            >
-                                              <v-icon> mdi-cancel </v-icon>
-                                            </v-chip>
-                                          </template>
-                                          <span
-                                            v-if="
-                                              IsStatusMatch(
+                                      <v-tooltip bottom>
+                                        <template
+                                          v-slot:activator="{ on, attrs }"
+                                        >
+                                          <v-chip
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            class="my-2"
+                                            color="error"
+                                            :outlined="
+                                              !IsStatusMatch(
                                                 goal.Status,
                                                 'Cancelled'
                                               )
                                             "
-                                            >Cancelled</span
+                                            @click="
+                                              setPreviousGoalStatus(
+                                                goal,
+                                                'Cancelled'
+                                              )
+                                            "
                                           >
-                                          <span v-else>Mark Cancelled</span>
-                                        </v-tooltip>
-                                      </td>
-                                    </tr>
-                                  </v-simple-table>
-                                </td>
-                              </tr>
-                            </template>
-                          </tbody>
-                        </v-simple-table>
-                      </template>
+                                            <v-icon> mdi-cancel </v-icon>
+                                          </v-chip>
+                                        </template>
+                                        <span
+                                          v-if="
+                                            IsStatusMatch(
+                                              goal.Status,
+                                              'Cancelled'
+                                            )
+                                          "
+                                          >Cancelled</span
+                                        >
+                                        <span v-else>Mark Cancelled</span>
+                                      </v-tooltip>
+                                    </td>
+                                  </tr>
+                                </v-simple-table>
+                              </td>
+                            </tr>
+                          </template>
+                        </tbody>
+                      </v-simple-table>
                     </v-col>
                     <v-col cols="12" md="6">
                       <h2>Current</h2>
-
-                      <v-row class="pl-5 pr-5">
-                        <v-text-field
-                          v-model="GoalTitle"
-                          label="New Goal"
-                          required
-                        ></v-text-field>
-                        <v-spacer></v-spacer>
-                        <v-btn
-                          color="primary"
-                          class="ma-2 white--text"
-                          @click="addGoal()"
-                          :disabled="!validNewGoal"
-                        >
-                          <v-icon> mdi-arrow-down-box </v-icon>
-                        </v-btn>
-                      </v-row>
-                      <template>
-                        <v-simple-table>
-                          <thead>
-                            <tr>
-                              <th class="text-center" width="10%">Member</th>
-                              <th class="text-center" width="10%">Status</th>
-                              <th class="text-left" width="50%">Goal</th>
-                              <th class="text-center">actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr
-                              v-for="(goal, index) in attendeeGoals"
-                              :key="index"
-                            >
-                              <td class="text-center">
-                                <v-chip class="ma-2" color="success" outlined
-                                  >{{ goal.Member.Initials }}
-                                </v-chip>
-                              </td>
-                              <td class="text-center">
-                                <v-icon v-if="goal.Status === 'Carryover'">
-                                  mdi-contain-start
-                                </v-icon>
-                                <v-icon v-else-if="goal.Status === 'New'">
-                                  mdi-new-box
-                                </v-icon>
-                                <v-icon v-else> mdi-question </v-icon>
-                              </td>
-                              <td class="text-left">
-                                {{ goal.Title }}
-                                <v-spacer />
-                              </td>
-                              <td class="text-center">
-                                <v-chip
-                                  class="ma-2"
-                                  color="error"
-                                  outlined
-                                  @click="removeGoal(goal)"
-                                >
-                                  <v-icon> mdi-trash-can </v-icon>
-                                </v-chip>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </v-simple-table>
-                      </template>
+                      <v-simple-table>
+                        <thead>
+                          <tr>
+                            <th class="text-center" width="10%">Member</th>
+                            <th class="text-center" width="10%">Status</th>
+                            <th class="text-left" width="50%">Goal</th>
+                            <th class="text-center">actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr
+                            v-for="(goal, index) in attendeeGoals"
+                            :key="index"
+                          >
+                            <td class="text-center">
+                              <v-chip class="ma-2" color="success" outlined
+                                >{{ goal.Member.Initials }}
+                              </v-chip>
+                            </td>
+                            <td class="text-center">
+                              <v-icon
+                                v-if="goal.Status === 'Carryover'"
+                                color="warning"
+                              >
+                                mdi-application-import
+                              </v-icon>
+                              <v-icon v-else-if="goal.Status === 'New'">
+                                mdi-new-box
+                              </v-icon>
+                              <v-icon v-else> mdi-question </v-icon>
+                            </td>
+                            <td class="text-left">
+                              {{ goal.Title }}
+                              <v-spacer />
+                            </td>
+                            <td class="text-center">
+                              <v-chip
+                                class="ma-2"
+                                color="error"
+                                outlined
+                                @click="removeGoal(goal)"
+                              >
+                                <v-icon> mdi-trash-can </v-icon>
+                              </v-chip>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </v-simple-table>
                     </v-col>
                   </v-row>
                 </v-card-text>
@@ -535,91 +407,280 @@
             <v-tab-item>
               <v-card class="mx-auto">
                 <v-toolbar color="#a72f39" dark dense>
-                  <v-toolbar-title
-                    >Sidebars:
-                    <span v-if="selectedAttendee">{{
-                      selectedAttendee.DisplayName
-                    }}</span></v-toolbar-title
-                  >
+                  <v-toolbar-title>Sidebars</v-toolbar-title>
+                  <v-spacer></v-spacer>
+                  <span v-if="selectedAttendee">{{
+                    selectedAttendee.DisplayName
+                  }}</span>
+                  <v-spacer></v-spacer>
                 </v-toolbar>
                 <v-card-text>
-                  <v-row>
-                    <v-col>
-                      <v-select
-                        v-model="SidebarRequestedOf"
-                        :items="Meeting.Attendees"
-                        item-text="DisplayName"
-                        item-value="Email"
-                        label="Requested Of"
-                        return-object
-                        single-line
-                      ></v-select>
-                    </v-col>
-                    <v-col>
-                      <v-text-field
-                        v-model="SidebarReason"
-                        label="Reason"
-                        required
-                      ></v-text-field>
-                    </v-col>
-                    <v-col>
-                      <v-btn
-                        color="primary"
-                        class="ma-2 white--text"
-                        @click="addSidebar()"
-                        :disabled="!validNewSidebar"
+                  <v-card class="mb-5" rounded>
+                    <v-card-text>
+                      <v-overlay
+                        absolute="true"
+                        :value="!selectedAttendee || !selectedAttendee.Email"
                       >
-                        <v-icon> mdi-arrow-down-box </v-icon>
-                      </v-btn>
+                        <h3>Select an attendee</h3>
+                      </v-overlay>
+                      <v-row>
+                        <v-col cols="5">
+                          <v-select
+                            v-model="SidebarRequestedOf"
+                            :items="Meeting.Attendees"
+                            label="Requested Of"
+                            item-text="DisplayName"
+                            item-value="Email"
+                            return-object
+                            single-line
+                          ></v-select>
+                        </v-col>
+                        <v-col cols="5">
+                          <v-text-field
+                            v-model="SidebarReason"
+                            label="Reason"
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="2" class="text-center">
+                          <v-btn
+                            color="primary"
+                            class="ma-2 white--text"
+                            @click="addSidebar()"
+                            :disabled="!validNewSidebar"
+                          >
+                            <v-icon> mdi-arrow-down-box </v-icon>
+                          </v-btn>
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                  </v-card>
+                  <v-row>
+                    <v-col cols="12" md="6">
+                      <h2>Previous</h2>
+                      <v-simple-table>
+                        <thead>
+                          <tr>
+                            <th class="text-center" width="20%">By</th>
+                            <th class="text-center" width="20%">Of</th>
+                            <th width="60%">Reason</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr
+                            v-for="(sidebar, index) in attendeePreviousSidebars"
+                            :key="index"
+                          >
+                            <td colspan="3" class="pa-0">
+                              <v-simple-table
+                                dense
+                                id="attendeePreviousSidebars-index"
+                              >
+                                <tr>
+                                  <td class="text-center" width="20%">
+                                    <v-chip
+                                      class="my-2"
+                                      color="success"
+                                      outlined
+                                      >{{ sidebar.RequestedBy.Initials }}
+                                    </v-chip>
+                                  </td>
+                                  <td class="text-center" width="20%">
+                                    <v-chip
+                                      class="my-2"
+                                      color="success"
+                                      outlined
+                                      >{{ sidebar.RequestedOf.Initials }}
+                                    </v-chip>
+                                  </td>
+                                  <td class="text-left" width="60%">
+                                    {{ sidebar.Reason }}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td colspan="2"></td>
+                                  <td class="text-left">
+                                    <v-tooltip bottom>
+                                      <template
+                                        v-slot:activator="{ on, attrs }"
+                                      >
+                                        <v-chip
+                                          v-bind="attrs"
+                                          v-on="on"
+                                          class="ma-2"
+                                          color="success"
+                                          :outlined="
+                                            !IsStatusMatch(
+                                              sidebar.Status,
+                                              'Complete'
+                                            )
+                                          "
+                                          @click="
+                                            setPreviousSidebarStatus(
+                                              sidebar,
+                                              'Complete'
+                                            )
+                                          "
+                                        >
+                                          <v-icon> mdi-check </v-icon>
+                                        </v-chip>
+                                      </template>
+                                      <span
+                                        v-if="
+                                          IsStatusMatch(
+                                            sidebar.Status,
+                                            'Complete'
+                                          )
+                                        "
+                                        >Completed</span
+                                      >
+                                      <span v-else>Mark Complete</span>
+                                    </v-tooltip>
+
+                                    <v-tooltip bottom>
+                                      <template
+                                        v-slot:activator="{ on, attrs }"
+                                      >
+                                        <v-chip
+                                          v-bind="attrs"
+                                          v-on="on"
+                                          class="mx-4 my-2"
+                                          color="warning"
+                                          :outlined="
+                                            !IsStatusMatch(
+                                              sidebar.Status,
+                                              'Ongoing,Carryover'
+                                            )
+                                          "
+                                          @click="
+                                            carryoverPreviousSidebar(sidebar)
+                                          "
+                                        >
+                                          <v-icon>
+                                            mdi-application-export
+                                          </v-icon>
+                                        </v-chip>
+                                      </template>
+                                      <span
+                                        v-if="
+                                          IsStatusMatch(
+                                            sidebar.Status,
+                                            'Ongoing,Carryover'
+                                          )
+                                        "
+                                        >Ongoing</span
+                                      >
+                                      <span v-else>Mark Ongoing</span>
+                                    </v-tooltip>
+
+                                    <v-tooltip bottom>
+                                      <template
+                                        v-slot:activator="{ on, attrs }"
+                                      >
+                                        <v-chip
+                                          v-bind="attrs"
+                                          v-on="on"
+                                          class="ma-2"
+                                          color="error"
+                                          :outlined="
+                                            !IsStatusMatch(
+                                              sidebar.Status,
+                                              'Cancelled'
+                                            )
+                                          "
+                                          @click="
+                                            setPreviousSidebarStatus(
+                                              sidebar,
+                                              'Cancelled'
+                                            )
+                                          "
+                                        >
+                                          <v-icon> mdi-cancel </v-icon>
+                                        </v-chip>
+                                      </template>
+                                      <span
+                                        v-if="
+                                          IsStatusMatch(
+                                            sidebar.Status,
+                                            'Cancelled'
+                                          )
+                                        "
+                                        >Cancelled</span
+                                      >
+                                      <span v-else>Mark Cancelled</span>
+                                    </v-tooltip>
+                                  </td>
+                                </tr>
+                              </v-simple-table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </v-simple-table>
+                    </v-col>
+                    <v-col cols="12" md="6">
+                      <h2>Current</h2>
+                      <v-simple-table>
+                        <thead>
+                          <tr>
+                            <th class="text-left" width="20%">By</th>
+                            <th class="text-left" width="20%">Of</th>
+                            <th width="60%">Reason</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr
+                            v-for="(sidebar, index) in attendeeSidebars"
+                            :key="index"
+                          >
+                            <td colspan="3" class="pa-0">
+                              <v-simple-table dense>
+                                <td class="text-center" width="20%">
+                                  <v-chip class="my-2" color="success" outlined
+                                    >{{ sidebar.RequestedBy.Initials }}
+                                  </v-chip>
+                                </td>
+                                <td class="text-center" width="20%">
+                                  <v-chip class="my-2" color="success" outlined
+                                    >{{ sidebar.RequestedOf.Initials }}
+                                  </v-chip>
+                                </td>
+                                <td class="text-left" width="60%">
+                                  {{ sidebar.Reason }}
+                                </td>
+                                <tr>
+                                  <td class="text-center" colspan="2">
+                                    <v-icon
+                                      v-if="sidebar.Status === 'New'"
+                                      color="blue"
+                                    >
+                                      mdi-new-box
+                                    </v-icon>
+                                    <v-icon
+                                      color="warning"
+                                      v-else-if="sidebar.Status === 'Carryover'"
+                                    >
+                                      mdi-application-import
+                                    </v-icon>
+                                    <v-icon v-else> mdi-question </v-icon>
+                                  </td>
+                                  <td class="text-center">
+                                    <v-chip
+                                      class="ma-2"
+                                      color="error"
+                                      outlined
+                                      @click="removeSidebar(sidebar)"
+                                    >
+                                      <v-icon> mdi-trash-can </v-icon>
+                                    </v-chip>
+                                  </td>
+                                </tr>
+                              </v-simple-table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </v-simple-table>
                     </v-col>
                   </v-row>
-
-                  <template>
-                    <v-simple-table>
-                      <thead>
-                        <tr>
-                          <th class="text-center" width="10%">RequestedBy</th>
-                          <th class="text-center" width="10%">RequestedOf</th>
-                          <th class="text-center" width="10%">Status</th>
-                          <th class="text-left" width="50%">Reason</th>
-                          <th class="text-center">actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr
-                          v-for="(sidebar, index) in attendeeSidebars"
-                          :key="index"
-                        >
-                          <td class="text-center">
-                            <v-chip class="ma-2" color="success" outlined
-                              >{{ sidebar.RequestedBy.Initials }}
-                            </v-chip>
-                          </td>
-                          <td class="text-center">
-                            <v-chip class="ma-2" color="success" outlined
-                              >{{ sidebar.RequestedOf.Initials }}
-                            </v-chip>
-                          </td>
-                          <td class="text-center">{{ sidebar.Status }}</td>
-                          <td class="text-left">
-                            {{ sidebar.Reason }}
-                            <v-spacer />
-                          </td>
-                          <td class="text-center">
-                            <v-chip
-                              v-if="sidebar.Status == 'New'"
-                              class="ma-2"
-                              color="error"
-                              outlined
-                              @click="removeSidebar(sidebar)"
-                            >
-                              <v-icon> mdi-trash-can </v-icon>
-                            </v-chip>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </v-simple-table>
-                  </template>
                 </v-card-text>
               </v-card>
             </v-tab-item>
@@ -628,31 +689,43 @@
             <v-tab-item>
               <v-card class="mx-auto">
                 <v-toolbar color="#a72f39" dark dense>
-                  <v-toolbar-title
-                    >Roadblocks:
-                    <span v-if="selectedAttendee">{{
-                      selectedAttendee.DisplayName
-                    }}</span></v-toolbar-title
-                  >
+                  <v-toolbar-title>Roadblocks</v-toolbar-title>
+                  <v-spacer></v-spacer>
+                  <span v-if="selectedAttendee">{{
+                    selectedAttendee.DisplayName
+                  }}</span>
+                  <v-spacer></v-spacer>
                 </v-toolbar>
                 <v-card-text>
-                  <v-row class="pl-5 pr-5">
-                    <v-text-field
-                      v-model="RoadblockTitle"
-                      label="Roadblock"
-                      required
-                    ></v-text-field>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      color="success"
-                      class="ma-2 white--text"
-                      @click="addRoadblock()"
-                      :disabled="!validNewRoadblock"
-                    >
-                      <v-icon> mdi-arrow-down-box </v-icon>
-                    </v-btn>
+                  <v-card class="mb-5" rounded>
+                    <v-card-text>
+                      <v-overlay
+                        absolute="true"
+                        :value="!selectedAttendee || !selectedAttendee.Email"
+                      >
+                        <h3>Select an attendee</h3>
+                      </v-overlay>
+                      <v-row>
+                    <v-col cols="10">
+                      <v-text-field
+                        v-model="RoadblockTitle"
+                        label="Roadblock"
+                        required
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="2" class="text-center">
+                      <v-btn
+                        color="primary"
+                        class="ma-2 white--text"
+                        @click="addRoadblock()"
+                        :disabled="!validNewRoadblock"
+                      >
+                        <v-icon> mdi-arrow-down-box </v-icon>
+                      </v-btn>
+                    </v-col>
                   </v-row>
-                  <template>
+                    </v-card-text>
+                  </v-card>
                     <v-simple-table>
                       <thead>
                         <tr>
@@ -690,7 +763,6 @@
                         </tr>
                       </tbody>
                     </v-simple-table>
-                  </template>
                 </v-card-text>
               </v-card>
             </v-tab-item>
@@ -1033,11 +1105,6 @@ export default {
         High,
       })
     },
-    /*
-    INCOMPLETE: Intended to carry the goal from PreviousGoals to Goals
-    if/when the goal is marked at ongoing
-    * Not using it right now due to pending feedback from Gary
-    */
     carryoverPreviousGoal: function (pGoal) {
       const GroupID = this.$route.params.groupid
       const MeetingID = this.$route.params.id
@@ -1114,6 +1181,28 @@ export default {
         MeetingID,
         Goal,
         Status,
+      })
+    },
+    carryoverPreviousSidebar: function (pSidebar) {
+      const GroupID = this.$route.params.groupid
+      const MeetingID = this.$route.params.id
+      const Status = 'Carryover'
+      const Sidebar = { ...pSidebar }
+
+      // set the previous Sidebar status to 'Carryover'
+      this.$store.dispatch('bagMeetings/SetPreviousSidebarStatus', {
+        GroupID,
+        MeetingID,
+        Sidebar,
+        Status,
+      })
+
+      Sidebar.Status = 'Carryover'
+      // add the sidebar to Sidebars
+      this.$store.dispatch('bagMeetings/AddSidebar', {
+        GroupID,
+        MeetingID,
+        Sidebar,
       })
     },
     addSidebar: function () {
