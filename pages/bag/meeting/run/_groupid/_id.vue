@@ -706,63 +706,63 @@
                         <h3>Select an attendee</h3>
                       </v-overlay>
                       <v-row>
-                    <v-col cols="10">
-                      <v-text-field
-                        v-model="RoadblockTitle"
-                        label="Roadblock"
-                        required
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="2" class="text-center">
-                      <v-btn
-                        color="primary"
-                        class="ma-2 white--text"
-                        @click="addRoadblock()"
-                        :disabled="!validNewRoadblock"
-                      >
-                        <v-icon> mdi-arrow-down-box </v-icon>
-                      </v-btn>
-                    </v-col>
-                  </v-row>
+                        <v-col cols="10">
+                          <v-text-field
+                            v-model="RoadblockTitle"
+                            label="Roadblock"
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="2" class="text-center">
+                          <v-btn
+                            color="primary"
+                            class="ma-2 white--text"
+                            @click="addRoadblock()"
+                            :disabled="!validNewRoadblock"
+                          >
+                            <v-icon> mdi-arrow-down-box </v-icon>
+                          </v-btn>
+                        </v-col>
+                      </v-row>
                     </v-card-text>
                   </v-card>
-                    <v-simple-table>
-                      <thead>
-                        <tr>
-                          <th class="text-center" width="10%">Member</th>
-                          <th class="text-center" width="10%">Status</th>
-                          <th class="text-left" width="50%">Roadblock</th>
-                          <th class="text-center">actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr
-                          v-for="(roadblock, index) in attendeeRoadblocks"
-                          :key="index"
-                        >
-                          <td class="text-center">
-                            <v-chip class="ma-2" color="success" outlined
-                              >{{ roadblock.Member.Initials }}
-                            </v-chip>
-                          </td>
-                          <td class="text-center">{{ roadblock.Status }}</td>
-                          <td class="text-left">
-                            {{ roadblock.Title }}
-                            <v-spacer />
-                          </td>
-                          <td class="text-center">
-                            <v-chip
-                              class="ma-2"
-                              color="error"
-                              outlined
-                              @click="removeRoadblock(roadblock)"
-                            >
-                              <v-icon> mdi-trash-can </v-icon>
-                            </v-chip>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </v-simple-table>
+                  <v-simple-table>
+                    <thead>
+                      <tr>
+                        <th class="text-center" width="10%">Member</th>
+                        <th class="text-center" width="10%">Status</th>
+                        <th class="text-left" width="50%">Roadblock</th>
+                        <th class="text-center">actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="(roadblock, index) in attendeeRoadblocks"
+                        :key="index"
+                      >
+                        <td class="text-center">
+                          <v-chip class="ma-2" color="success" outlined
+                            >{{ roadblock.Member.Initials }}
+                          </v-chip>
+                        </td>
+                        <td class="text-center">{{ roadblock.Status }}</td>
+                        <td class="text-left">
+                          {{ roadblock.Title }}
+                          <v-spacer />
+                        </td>
+                        <td class="text-center">
+                          <v-chip
+                            class="ma-2"
+                            color="error"
+                            outlined
+                            @click="removeRoadblock(roadblock)"
+                          >
+                            <v-icon> mdi-trash-can </v-icon>
+                          </v-chip>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </v-simple-table>
                 </v-card-text>
               </v-card>
             </v-tab-item>
@@ -826,7 +826,7 @@ export default {
   data() {
     return {
       bottomSheet: false,
-      selectedTab: 2,
+      selectedTab: 0,
       selectedAttendeeIndex: {},
 
       HighTitle: '',
