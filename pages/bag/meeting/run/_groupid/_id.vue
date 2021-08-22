@@ -155,109 +155,7 @@
                     }}</span></v-toolbar-title
                   >
                 </v-toolbar>
-                <v-card-text>
-                  <template>
-                    <v-simple-table>
-                      <thead>
-                        <tr>
-                          <th class="text-center" width="10%">Member</th>
-                          <th class="text-center" width="10%">Status</th>
-                          <th class="text-left">Goal</th>
-                          <th class="text-center" width="30%">actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr
-                          v-for="(goal, index) in attendeePreviousGoals"
-                          :key="index"
-                        >
-                          <td class="text-center">
-                            <v-chip class="ma-2" color="success" outlined
-                              >{{ goal.Member.Initials }}
-                            </v-chip>
-                          </td>
-                          <td class="text-center">{{ goal.Status }}</td>
-                          <td class="text-left">
-                            {{ goal.Title }}
-                            <v-spacer />
-                          </td>
-                          <td class="text-center">
-                            <v-tooltip bottom>
-                              <template v-slot:activator="{ on, attrs }">
-                                <v-chip
-                                  v-bind="attrs"
-                                  v-on="on"
-                                  class="ma-2"
-                                  color="success"
-                                  :outlined="
-                                    !IsStatusMatch(goal.Status, 'Complete')
-                                  "
-                                  @click="
-                                    setPreviousGoalStatus(goal, 'Complete')
-                                  "
-                                >
-                                  <v-icon> mdi-check </v-icon>
-                                </v-chip>
-                              </template>
-                              <span
-                                v-if="IsStatusMatch(goal.Status, 'Complete')"
-                                >Completed</span
-                              >
-                              <span v-else>Mark Complete</span>
-                            </v-tooltip>
-
-                            <v-tooltip bottom>
-                              <template v-slot:activator="{ on, attrs }">
-                                <v-chip
-                                  v-bind="attrs"
-                                  v-on="on"
-                                  class="ma-2"
-                                  color="error"
-                                  :outlined="
-                                    !IsStatusMatch(goal.Status, 'Ongoing')
-                                  "
-                                  @click="
-                                    setPreviousGoalStatus(goal, 'Ongoing')
-                                  "
-                                >
-                                  <v-icon> mdi-contain-start </v-icon>
-                                </v-chip>
-                              </template>
-                              <span v-if="IsStatusMatch(goal.Status, 'Ongoing')"
-                                >Ongoing</span
-                              >
-                              <span v-else>Mark Ongoing</span>
-                            </v-tooltip>
-
-                            <v-tooltip bottom>
-                              <template v-slot:activator="{ on, attrs }">
-                                <v-chip
-                                  v-bind="attrs"
-                                  v-on="on"
-                                  class="ma-2"
-                                  color="error"
-                                  :outlined="
-                                    !IsStatusMatch(goal.Status, 'Cancelled')
-                                  "
-                                  @click="
-                                    setPreviousGoalStatus(goal, 'Cancelled')
-                                  "
-                                >
-                                  <v-icon> mdi-cancel </v-icon>
-                                </v-chip>
-                              </template>
-                              <span
-                                v-if="IsStatusMatch(goal.Status, 'Cancelled')"
-                                >Cancelled</span
-                              >
-                              <span v-else>Mark Cancelled</span>
-                            </v-tooltip>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </v-simple-table>
-                  </template>
-                </v-card-text>
+                <v-card-text> </v-card-text>
               </v-card>
               <v-card class="mx-auto">
                 <v-toolbar color="#a72f39" dark dense>
@@ -401,60 +299,234 @@
                   >
                 </v-toolbar>
                 <v-card-text>
-                  <v-row class="pl-5 pr-5">
-                    <v-text-field
-                      v-model="GoalTitle"
-                      label="Goal"
-                      required
-                    ></v-text-field>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      color="primary"
-                      class="ma-2 white--text"
-                      @click="addGoal()"
-                      :disabled="!validNewGoal"
-                    >
-                      <v-icon> mdi-arrow-down-box </v-icon>
-                    </v-btn>
-                  </v-row>
+                  <v-row>
+                    <v-col cols="12" md="6">
+                      <template>
+                        <h2>Previous</h2>
+                        <v-simple-table
+                          dense
+                          class="pa-0"
+                          v-if="attendeePreviousGoals.length > 0"
+                        >
+                          <thead>
+                            <tr>
+                              <th class="text-center" width="30%">Member</th>
+                              <th class="text-left pa-0" width="70%">
+                                Previous Goal
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <template>
+                              <tr
+                                v-for="(goal, index) in attendeePreviousGoals"
+                                :key="index"
+                              >
+                                <td colspan="2" class="pa-0">
+                                  <v-simple-table dense>
+                                    <tr>
+                                      <td class="text-center" width="30%">
+                                        <v-chip
+                                          class="my-2"
+                                          color="success"
+                                          outlined
+                                          >{{ goal.Member.Initials }}
+                                        </v-chip>
+                                      </td>
+                                      <td class="text-left" width="70%">
+                                        {{ goal.Title }}
+                                        <v-spacer />
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td width="20%"></td>
+                                      <td class="text-left">
+                                        <v-tooltip bottom>
+                                          <template
+                                            v-slot:activator="{ on, attrs }"
+                                          >
+                                            <v-chip
+                                              v-bind="attrs"
+                                              v-on="on"
+                                              class="my-2"
+                                              color="success"
+                                              :outlined="
+                                                !IsStatusMatch(
+                                                  goal.Status,
+                                                  'Complete'
+                                                )
+                                              "
+                                              @click="
+                                                setPreviousGoalStatus(
+                                                  goal,
+                                                  'Complete'
+                                                )
+                                              "
+                                            >
+                                              <v-icon> mdi-check </v-icon>
+                                            </v-chip>
+                                          </template>
+                                          <span
+                                            v-if="
+                                              IsStatusMatch(
+                                                goal.Status,
+                                                'Complete'
+                                              )
+                                            "
+                                            >Completed</span
+                                          >
+                                          <span v-else>Mark Complete</span>
+                                        </v-tooltip>
+                                        <v-tooltip bottom>
+                                          <template
+                                            v-slot:activator="{ on, attrs }"
+                                          >
+                                            <v-chip
+                                              v-bind="attrs"
+                                              v-on="on"
+                                              class="mx-4 my-2"
+                                              color="error"
+                                              :outlined="
+                                                !IsStatusMatch(
+                                                  goal.Status,
+                                                  'Ongoing,Carryover'
+                                                )
+                                              "
+                                              @click="
+                                                carryoverPreviousGoal(goal)
+                                              "
+                                            >
+                                              <v-icon>
+                                                mdi-contain-start
+                                              </v-icon>
+                                            </v-chip>
+                                          </template>
+                                          <span
+                                            v-if="
+                                              IsStatusMatch(
+                                                goal.Status,
+                                                'Ongoing'
+                                              )
+                                            "
+                                            >Ongoing</span
+                                          >
+                                          <span v-else>Mark Ongoing</span>
+                                        </v-tooltip>
 
-                  <template>
-                    <v-simple-table>
-                      <thead>
-                        <tr>
-                          <th class="text-center" width="10%">Member</th>
-                          <th class="text-center" width="10%">Status</th>
-                          <th class="text-left" width="50%">Goal</th>
-                          <th class="text-center">actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="(goal, index) in attendeeGoals" :key="index">
-                          <td class="text-center">
-                            <v-chip class="ma-2" color="success" outlined
-                              >{{ goal.Member.Initials }}
-                            </v-chip>
-                          </td>
-                          <td class="text-center">{{ goal.Status }}</td>
-                          <td class="text-left">
-                            {{ goal.Title }}
-                            <v-spacer />
-                          </td>
-                          <td class="text-center">
-                            <v-chip
-                              v-if="goal.Status == 'New'"
-                              class="ma-2"
-                              color="error"
-                              outlined
-                              @click="removeGoal(goal)"
+                                        <v-tooltip bottom>
+                                          <template
+                                            v-slot:activator="{ on, attrs }"
+                                          >
+                                            <v-chip
+                                              v-bind="attrs"
+                                              v-on="on"
+                                              class="my-2"
+                                              color="error"
+                                              :outlined="
+                                                !IsStatusMatch(
+                                                  goal.Status,
+                                                  'Cancelled'
+                                                )
+                                              "
+                                              @click="
+                                                setPreviousGoalStatus(
+                                                  goal,
+                                                  'Cancelled'
+                                                )
+                                              "
+                                            >
+                                              <v-icon> mdi-cancel </v-icon>
+                                            </v-chip>
+                                          </template>
+                                          <span
+                                            v-if="
+                                              IsStatusMatch(
+                                                goal.Status,
+                                                'Cancelled'
+                                              )
+                                            "
+                                            >Cancelled</span
+                                          >
+                                          <span v-else>Mark Cancelled</span>
+                                        </v-tooltip>
+                                      </td>
+                                    </tr>
+                                  </v-simple-table>
+                                </td>
+                              </tr>
+                            </template>
+                          </tbody>
+                        </v-simple-table>
+                      </template>
+                    </v-col>
+                    <v-col cols="12" md="6">
+                      <h2>Current</h2>
+
+                      <v-row class="pl-5 pr-5">
+                        <v-text-field
+                          v-model="GoalTitle"
+                          label="New Goal"
+                          required
+                        ></v-text-field>
+                        <v-spacer></v-spacer>
+                        <v-btn
+                          color="primary"
+                          class="ma-2 white--text"
+                          @click="addGoal()"
+                          :disabled="!validNewGoal"
+                        >
+                          <v-icon> mdi-arrow-down-box </v-icon>
+                        </v-btn>
+                      </v-row>
+                      <template>
+                        <v-simple-table>
+                          <thead>
+                            <tr>
+                              <th class="text-center" width="10%">Member</th>
+                              <th class="text-center" width="10%">Status</th>
+                              <th class="text-left" width="50%">Goal</th>
+                              <th class="text-center">actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr
+                              v-for="(goal, index) in attendeeGoals"
+                              :key="index"
                             >
-                              <v-icon> mdi-trash-can </v-icon>
-                            </v-chip>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </v-simple-table>
-                  </template>
+                              <td class="text-center">
+                                <v-chip class="ma-2" color="success" outlined
+                                  >{{ goal.Member.Initials }}
+                                </v-chip>
+                              </td>
+                              <td class="text-center">
+                                <v-icon v-if="goal.Status === 'Carryover'">
+                                  mdi-contain-start
+                                </v-icon>
+                                <v-icon v-else-if="goal.Status === 'New'">
+                                  mdi-new-box
+                                </v-icon>
+                                <v-icon v-else> mdi-question </v-icon>
+                              </td>
+                              <td class="text-left">
+                                {{ goal.Title }}
+                                <v-spacer />
+                              </td>
+                              <td class="text-center">
+                                <v-chip
+                                  class="ma-2"
+                                  color="error"
+                                  outlined
+                                  @click="removeGoal(goal)"
+                                >
+                                  <v-icon> mdi-trash-can </v-icon>
+                                </v-chip>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </v-simple-table>
+                      </template>
+                    </v-col>
+                  </v-row>
                 </v-card-text>
               </v-card>
             </v-tab-item>
@@ -682,7 +754,7 @@ export default {
   data() {
     return {
       bottomSheet: false,
-      selectedTab: 0,
+      selectedTab: 2,
       selectedAttendeeIndex: {},
 
       HighTitle: '',
@@ -917,25 +989,11 @@ export default {
   },
   methods: {
     IsStatusMatch: function (Status, Match) {
-      if (Status === Match) {
-        return true
+      if (!Status) {
+        return false
       }
-      return false
-    },
-    IsComplete: function (Status) {
-      if (Status === 'Complete') {
-        return true
-      }
-      return false
-    },
-    IsOngoing: function (Status) {
-      if (Status === 'Ongoing') {
-        return true
-      }
-      return false
-    },
-    IsCancelled: function (Status) {
-      if (Status === 'Cancelled') {
+      // this won't work if we add Incomplete since Complete would also match
+      if (Match.includes(Status)) {
         return true
       }
       return false
@@ -980,13 +1038,13 @@ export default {
     if/when the goal is marked at ongoing
     * Not using it right now due to pending feedback from Gary
     */
-    addGoalFromPrevious: function (Goal) {
-      console.log('addGoalFromPrevious(Goal):')
-      console.log(Goal)
+    carryoverPreviousGoal: function (pGoal) {
       const GroupID = this.$route.params.groupid
       const MeetingID = this.$route.params.id
+      const Status = 'Carryover'
+      const Goal = { ...pGoal }
 
-      // set the previous goal status to 'Ongoing'
+      // set the previous goal status to 'Carryover'
       this.$store.dispatch('bagMeetings/SetPreviousGoalStatus', {
         GroupID,
         MeetingID,
@@ -994,6 +1052,7 @@ export default {
         Status,
       })
 
+      Goal.Status = 'Carryover'
       // add the goal to Goals
       this.$store.dispatch('bagMeetings/AddGoal', {
         GroupID,
@@ -1032,6 +1091,16 @@ export default {
         MeetingID,
         Goal,
       })
+      if (Goal.Status === 'Carryover') {
+        const Status = ''
+        // set the previous goal status to ''
+        this.$store.dispatch('bagMeetings/SetPreviousGoalStatus', {
+          GroupID,
+          MeetingID,
+          Goal,
+          Status,
+        })
+      }
     },
     setPreviousGoalStatus: function (Goal, Status) {
       // is the status actually changing?

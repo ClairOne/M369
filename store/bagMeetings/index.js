@@ -472,7 +472,7 @@ const actions = {
         Update the status of a PreviousGoal in Meeting.PreviousGoals
     */
     async SetPreviousGoalStatus({ context }, { GroupID, MeetingID, Goal, Status }) {
-        if (!GroupID || !MeetingID || !Goal || !Status) { return }
+        if (!GroupID || !MeetingID || !Goal) { return }
 
         // fetch the document
         const meetingRef = this.$fire.firestore.collection("bagGroups").doc(GroupID).collection('Meetings').doc(MeetingID)
