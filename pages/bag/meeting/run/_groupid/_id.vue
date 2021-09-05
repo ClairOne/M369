@@ -69,7 +69,7 @@
                   <v-card class="mb-5" rounded>
                     <v-card-text>
                       <v-overlay
-                        absolute="true"
+                        absolute
                         :value="!selectedAttendee || !selectedAttendee.Email"
                       >
                         <h3>Select an attendee</h3>
@@ -169,7 +169,7 @@
                   <v-card class="mb-5" rounded>
                     <v-card-text>
                       <v-overlay
-                        absolute="true"
+                        absolute
                         :value="!selectedAttendee || !selectedAttendee.Email"
                       >
                         <h3>Select an attendee</h3>
@@ -418,7 +418,7 @@
                   <v-card class="mb-5" rounded>
                     <v-card-text>
                       <v-overlay
-                        absolute="true"
+                        absolute
                         :value="!selectedAttendee || !selectedAttendee.Email"
                       >
                         <h3>Select an attendee</h3>
@@ -700,7 +700,7 @@
                   <v-card class="mb-5" rounded>
                     <v-card-text>
                       <v-overlay
-                        absolute="true"
+                        absolute
                         :value="!selectedAttendee || !selectedAttendee.Email"
                       >
                         <h3>Select an attendee</h3>
@@ -726,43 +726,216 @@
                       </v-row>
                     </v-card-text>
                   </v-card>
-                  <v-simple-table>
-                    <thead>
-                      <tr>
-                        <th class="text-center" width="10%">Member</th>
-                        <th class="text-center" width="10%">Status</th>
-                        <th class="text-left" width="50%">Roadblock</th>
-                        <th class="text-center">actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr
-                        v-for="(roadblock, index) in attendeeRoadblocks"
-                        :key="index"
-                      >
-                        <td class="text-center">
-                          <v-chip class="ma-2" color="success" outlined
-                            >{{ roadblock.Member.Initials }}
-                          </v-chip>
-                        </td>
-                        <td class="text-center">{{ roadblock.Status }}</td>
-                        <td class="text-left">
-                          {{ roadblock.Title }}
-                          <v-spacer />
-                        </td>
-                        <td class="text-center">
-                          <v-chip
-                            class="ma-2"
-                            color="error"
-                            outlined
-                            @click="removeRoadblock(roadblock)"
+                  <v-row>
+                    <v-col cols="12" md="6">
+                      <h2>Previous</h2>
+                      <v-simple-table v-if="attendeePreviousGoals.length > 0">
+                        <thead>
+                          <tr>
+                            <th class="text-center" width="30%">Member</th>
+                            <th class="text-left pa-0" width="70%">
+                              Previous Roadblock
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <template>
+                            <tr
+                              v-for="(
+                                roadblock, index
+                              ) in attendeePreviousRoadblocks"
+                              :key="index"
+                            >
+                              <td colspan="2" class="pa-0">
+                                <v-simple-table dense>
+                                  <tr>
+                                    <td class="text-center" width="30%">
+                                      <v-chip
+                                        class="my-2"
+                                        color="success"
+                                        outlined
+                                        >{{ roadblock.Member.Initials }}
+                                      </v-chip>
+                                    </td>
+                                    <td class="text-left" width="70%">
+                                      {{ roadblock.Title }}
+                                      <v-spacer />
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td width="20%"></td>
+                                    <td class="text-left">
+                                      <v-tooltip bottom>
+                                        <template
+                                          v-slot:activator="{ on, attrs }"
+                                        >
+                                          <v-chip
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            class="my-2"
+                                            color="success"
+                                            :outlined="
+                                              !IsStatusMatch(
+                                                roadblock.Status,
+                                                'Complete'
+                                              )
+                                            "
+                                            @click="
+                                              setPreviousGoalStatus(
+                                                roadblock,
+                                                'Complete'
+                                              )
+                                            "
+                                          >
+                                            <v-icon> mdi-check </v-icon>
+                                          </v-chip>
+                                        </template>
+                                        <span
+                                          v-if="
+                                            IsStatusMatch(
+                                              roadblock.Status,
+                                              'Complete'
+                                            )
+                                          "
+                                          >Completed</span
+                                        >
+                                        <span v-else>Mark Complete</span>
+                                      </v-tooltip>
+                                      <v-tooltip bottom>
+                                        <template
+                                          v-slot:activator="{ on, attrs }"
+                                        >
+                                          <v-chip
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            class="mx-4 my-2"
+                                            color="warning"
+                                            :outlined="
+                                              !IsStatusMatch(
+                                                roadblock.Status,
+                                                'Ongoing,Carryover'
+                                              )
+                                            "
+                                            @click="
+                                              carryoverPreviousRoadblock(
+                                                roadblock
+                                              )
+                                            "
+                                          >
+                                            <v-icon>
+                                              mdi-application-export
+                                            </v-icon>
+                                          </v-chip>
+                                        </template>
+                                        <span
+                                          v-if="
+                                            IsStatusMatch(
+                                              roadblock.Status,
+                                              'Ongoing,Carryover'
+                                            )
+                                          "
+                                          >Ongoing</span
+                                        >
+                                        <span v-else>Mark Ongoing</span>
+                                      </v-tooltip>
+
+                                      <v-tooltip bottom>
+                                        <template
+                                          v-slot:activator="{ on, attrs }"
+                                        >
+                                          <v-chip
+                                            v-bind="attrs"
+                                            v-on="on"
+                                            class="my-2"
+                                            color="error"
+                                            :outlined="
+                                              !IsStatusMatch(
+                                                roadblock.Status,
+                                                'Cancelled'
+                                              )
+                                            "
+                                            @click="
+                                              setPreviousRoadblockStatus(
+                                                roadblock,
+                                                'Cancelled'
+                                              )
+                                            "
+                                          >
+                                            <v-icon> mdi-cancel </v-icon>
+                                          </v-chip>
+                                        </template>
+                                        <span
+                                          v-if="
+                                            IsStatusMatch(
+                                              roadblock.Status,
+                                              'Cancelled'
+                                            )
+                                          "
+                                          >Cancelled</span
+                                        >
+                                        <span v-else>Mark Cancelled</span>
+                                      </v-tooltip>
+                                    </td>
+                                  </tr>
+                                </v-simple-table>
+                              </td>
+                            </tr>
+                          </template>
+                        </tbody>
+                      </v-simple-table>
+                    </v-col>
+                    <v-col cols="12" md="6">
+                      <h2>Current</h2>
+                      <v-simple-table>
+                        <thead>
+                          <tr>
+                            <th class="text-center" width="10%">Member</th>
+                            <th class="text-center" width="10%">Status</th>
+                            <th class="text-left" width="50%">Roadblock</th>
+                            <th class="text-center">actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr
+                            v-for="(roadblock, index) in attendeeRoadblocks"
+                            :key="index"
                           >
-                            <v-icon> mdi-trash-can </v-icon>
-                          </v-chip>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </v-simple-table>
+                            <td class="text-center">
+                              <v-chip class="ma-2" color="success" outlined
+                                >{{ roadblock.Member.Initials }}
+                              </v-chip>
+                            </td>
+                            <td class="text-center">
+                              <v-icon
+                                v-if="roadblock.Status === 'Carryover'"
+                                color="warning"
+                              >
+                                mdi-application-import
+                              </v-icon>
+                              <v-icon v-else-if="roadblock.Status === 'New'">
+                                mdi-new-box
+                              </v-icon>
+                              <v-icon v-else> mdi-question </v-icon>
+                            </td>
+                            <td class="text-left">
+                              {{ roadblock.Title }}
+                              <v-spacer />
+                            </td>
+                            <td class="text-center">
+                              <v-chip
+                                class="ma-2"
+                                color="error"
+                                outlined
+                                @click="removeRoadblock(roadblock)"
+                              >
+                                <v-icon> mdi-trash-can </v-icon>
+                              </v-chip>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </v-simple-table>
+                    </v-col>
+                  </v-row>
                 </v-card-text>
               </v-card>
             </v-tab-item>
@@ -965,6 +1138,29 @@ export default {
       })
       return tmpSidebars
     },
+    attendeePreviousRoadblocks() {
+      // are there any PreviousRoadblocks in the Meeting?
+      if (
+        !this.Meeting ||
+        !this.Meeting.PreviousRoadblocks ||
+        this.Meeting.PreviousRoadblocks.length === 0
+      ) {
+        return []
+      }
+      // should we filter or return them all?
+      if (!this.selectedAttendee || !this.selectedAttendee.Email) {
+        // no Email, return them all
+        return this.Meeting.PreviousRoadblocks
+      }
+
+      // use this.Roadblocks which is the full list
+      let tmpRoadblocks = this.Meeting.PreviousRoadblocks
+
+      tmpRoadblocks = tmpRoadblocks.filter((item) => {
+        return item.Member.Email == this.selectedAttendee.Email
+      })
+      return tmpRoadblocks
+    },
     attendeeRoadblocks() {
       // are there any Roadblocks in the Meeting, yet?
       if (!this.Meeting.Roadblocks || this.Meeting.Roadblocks.length === 0) {
@@ -1033,7 +1229,7 @@ export default {
     IsRunning() {
       // has it loaded?
       if (!this.Meeting || !this.Meeting.id) {
-        console.log('Meeting not loaded.')
+        // @TODO: implement a page loading thingy
         return false
       }
       const GroupID = this.$route.params.groupid
@@ -1054,7 +1250,7 @@ export default {
       }
 
       if (this.Meeting.StartedAt && !this.Meeting.ClosedAt) {
-        console.log('Meeting is running.')
+        // @TODO: implement a page loading thingy
         return true
       }
     },
@@ -1206,9 +1402,6 @@ export default {
       })
     },
     addSidebar: function () {
-      console.log('this.route:')
-      console.log(this.$route.name)
-
       if (!this.validNewSidebar) {
         return
       }
@@ -1259,6 +1452,28 @@ export default {
         Status,
       })
     },
+    carryoverPreviousRoadblock: function (pRoadblock) {
+      const GroupID = this.$route.params.groupid
+      const MeetingID = this.$route.params.id
+      const Status = 'Carryover'
+      const Roadblock = { ...pRoadblock }
+
+      // set the previous roadblock status to 'Carryover'
+      this.$store.dispatch('bagMeetings/SetPreviousRoadblockStatus', {
+        GroupID,
+        MeetingID,
+        Roadblock,
+        Status,
+      })
+
+      Roadblock.Status = 'Carryover'
+      // add the roadblock to Roadblocks
+      this.$store.dispatch('bagMeetings/AddRoadblock', {
+        GroupID,
+        MeetingID,
+        Roadblock,
+      })
+    },
     addRoadblock: function () {
       if (!this.validNewRoadblock) {
         return
@@ -1270,6 +1485,7 @@ export default {
       const Roadblock = {
         Member: Attendee,
         Title: this.RoadblockTitle,
+        Status: 'New',
         SourceType: 'bagMeeting',
         Source: MeetingID,
       }
@@ -1290,6 +1506,20 @@ export default {
         GroupID,
         MeetingID,
         Roadblock,
+      })
+    },
+    setPreviousRoadblockStatus: function (Roadblock, Status) {
+      // is the status actually changing?
+      if (Roadblock.Status === Status) {
+        return
+      }
+      const GroupID = this.$route.params.groupid
+      const MeetingID = this.$route.params.id
+      this.$store.dispatch('bagMeetings/SetPreviousRoadblockStatus', {
+        GroupID,
+        MeetingID,
+        Roadblock,
+        Status,
       })
     },
 
